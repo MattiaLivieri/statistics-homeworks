@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="A complete, standalone cryptography homework with executable JavaScript, reproducible results and references.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; font-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Homework 1.2 — Ethereum Wallet Pipeline — Mattia Livieri</title>
+<style>
+:root{--paper:#f5f3ed;--ink:#172a36;--muted:#536772;--line:#d8dedb;--teal:#087e83;--teal-light:#e4f3ef;--amber:#b76b11;--amber-light:#fff1d9;--card:#fff;--red:#b34232;--mono:ui-monospace,SFMono-Regular,Consolas,monospace}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:70px}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.65 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:var(--teal);text-underline-offset:3px}button,input,select{font:inherit}button,select{cursor:pointer}button{border:1px solid var(--teal);background:var(--teal);color:#fff;padding:.55rem .9rem;border-radius:6px;font-weight:600;line-height:1.35}button.secondary{background:white;color:var(--teal)}button:disabled{opacity:.5;cursor:default}button:hover:not(:disabled){filter:brightness(.94)}button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid #edae49;outline-offset:3px}input,select{max-width:100%;padding:.45rem .55rem;border:1px solid #a9babd;border-radius:5px;background:white;color:var(--ink)}label{display:flex;flex-direction:column;gap:5px;font-size:.85rem;font-weight:650}code,pre,.mono{font-family:var(--mono)}code{font-size:.9em}p{margin:.7rem 0 1rem}h1,h2,h3,h4{line-height:1.18;letter-spacing:-.025em}h1{font-size:clamp(2.2rem,5vw,4.2rem);max-width:880px;margin:16px 0 20px;font-weight:750}h2{font-size:clamp(1.6rem,3vw,2.3rem);margin:10px 0 20px}h3{font-size:1.3rem;margin:30px 0 12px}h4{font-size:1rem;margin:20px 0 8px}.wrap{max-width:1180px;margin:auto;padding:0 32px}.hero{background:var(--ink);color:white;padding:55px 0 40px;border-bottom:7px solid var(--teal)}.hero p{max-width:850px;color:#d5e5e5;font-size:1.05rem}.eyebrow{font-size:.75rem;font-weight:750;letter-spacing:.16em;text-transform:uppercase;color:var(--teal)}.hero .eyebrow{color:#85d8ce}.meta{color:#a9c3c8;font-size:.85rem}.hero-tags{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}.hero-tags span{border:1px solid #47616c;border-radius:4px;padding:3px 9px;color:#d6e8e8;font-size:.75rem}.nav{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.97);border-bottom:1px solid var(--line)}.nav .wrap{display:flex;gap:24px;align-items:center;min-height:59px}.nav a{font-size:.85rem;text-decoration:none;font-weight:650}.nav button{margin-left:auto;padding:.4rem .7rem;font-size:.8rem}main{padding-top:34px;padding-bottom:50px}section.chapter{margin-top:44px;padding-top:20px;border-top:1px solid #acbfbd}.chapter-number{font-family:var(--mono);font-size:.85rem;color:var(--teal)}.lead{max-width:940px;font-size:1.06rem}.callout{padding:15px 19px;border-left:4px solid var(--teal);background:var(--teal-light);border-radius:0 6px 6px 0;margin:22px 0}.callout p:last-child{margin-bottom:0}.callout.warn{border-color:var(--amber);background:var(--amber-light)}.callout.small{font-size:.88rem}.formula{display:block;background:#edf0ec;border:1px solid var(--line);padding:13px 17px;margin:13px 0;border-radius:5px;font-family:var(--mono);font-size:.88rem;line-height:1.8;overflow-x:auto;white-space:pre-wrap;overflow-wrap:anywhere}.columns{display:grid;grid-template-columns:1fr 1fr;gap:24px}.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:24px;min-width:0}.panel h3:first-child{margin-top:0}.lab{margin:24px 0}.controls{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin:18px 0}.controls input[type=number]{width:105px}.controls .wide{flex:1;min-width:200px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}.actions button{font-size:.8rem}.lab-grid{display:grid;grid-template-columns:1.12fr 1fr;gap:24px}.plot{width:100%;height:auto;display:block;background:#fbfcfa;border:1px solid var(--line);border-radius:7px}.caption{font-size:.78rem;color:var(--muted);line-height:1.5;margin:9px 0 13px}.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:.76rem;color:var(--muted);margin:10px 0}.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;background:#b9c9c9}.dot.teal{background:var(--teal)}.dot.amber{background:#df962c}.result{background:var(--ink);color:white;border-radius:7px;padding:18px 20px;margin-bottom:16px}.result .eyebrow{color:#8bddd3;font-size:.68rem}.result strong{display:block;font-family:var(--mono);font-size:1.5rem;margin-top:8px;overflow-wrap:anywhere}.status{color:var(--muted);font-size:.85rem;min-height:1.5em}.scroll-table{overflow:auto}.trace-scroll{max-height:305px;overflow:auto;border-bottom:1px solid var(--line)}table{width:100%;border-collapse:collapse;font-size:.85rem;line-height:1.5;margin:13px 0 20px}th{background:#e8eeea;text-align:left;font-weight:700;color:var(--ink)}th,td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}tbody tr:nth-child(even){background:#fafbf8}tbody tr.active{background:#fff0ce}td strong{font-weight:650}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:18px 0}.metric{padding:13px;background:#edf2ee;border-radius:6px}.metric span{display:block;font-size:.7rem;text-transform:uppercase;letter-spacing:.03em;color:var(--muted)}.metric strong{display:block;font-size:1.3rem;margin-top:4px;font-family:var(--mono);line-height:1.3}.muted{color:var(--muted)}.small{font-size:.86rem}.chart-title{font-size:.85rem;font-weight:650;margin:15px 0 8px}.chart{width:100%;display:block;height:auto}.definition td:first-child{width:155px;font-weight:700}.pipeline{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:22px 0}.pipeline article{padding:16px 18px;border:1px solid var(--line);background:#fff;border-top:3px solid var(--teal);border-radius:5px}.pipeline span{font-size:.68rem;letter-spacing:.07em;color:var(--muted);text-transform:uppercase}.pipeline strong{display:block;font-size:1rem;margin:5px 0}.pipeline p{font-size:.78rem;line-height:1.5;margin:0;color:var(--muted)}.hex{font-family:var(--mono);font-size:.77rem;overflow-wrap:anywhere;word-break:break-word;line-height:1.7;background:#edf2ee;padding:9px 12px;border-radius:4px}.hex.address{font-size:clamp(.78rem,1.7vw,1.15rem);font-weight:650;color:var(--teal)}.value-label{font-size:.74rem;font-weight:700;color:var(--muted);margin:13px 0 4px}.wallet-output .columns{gap:18px}.wallet-trace td:first-child{white-space:nowrap;font-family:var(--mono)}.wallet-trace code{overflow-wrap:anywhere;word-break:break-word;font-size:.7rem}.wallet-trace td{max-width:240px}details{border:1px solid var(--line);border-radius:6px;padding:12px 16px;margin:18px 0;background:#fff}summary{cursor:pointer;font-weight:650;font-size:.9rem}.source-code{font-size:.75rem;line-height:1.65;white-space:pre;overflow:auto;background:#102b35;color:#dcefeb;padding:20px;border-radius:5px;max-height:580px}.timeline td:first-child{font-weight:750;width:115px;color:var(--teal)}.sources{font-size:.8rem;line-height:1.7;padding-left:22px}.sources li{margin-bottom:9px;overflow-wrap:anywhere}.pass{color:#0c6a50}.fail{color:#a72d25}.checks-list{list-style:none;padding:0;margin:12px 0}.checks-list li{font-size:.83rem;border-bottom:1px solid var(--line);padding:6px 0}.footer{border-top:1px solid var(--line);padding-top:20px;margin-top:36px;font-size:.75rem;color:var(--muted)}.print-only{display:none}.bitline{display:flex;align-items:center;gap:10px;font-size:.8rem;margin:9px 0}.bitline b{width:115px;font-weight:600}.track{flex:1;height:17px;background:#e7ece8;position:relative;border-radius:2px}.track:after{content:'';position:absolute;left:50%;top:-3px;height:23px;border-left:1px dashed #a0804b}.track i{display:block;height:100%;background:var(--teal);border-radius:2px}.bitline .number{min-width:64px;text-align:right;font-family:var(--mono)}
+@media(max-width:850px){.wrap{padding:0 20px}.lab-grid,.columns{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,1fr)}.pipeline{grid-template-columns:repeat(2,1fr)}.panel{padding:18px}.nav .wrap{gap:15px;flex-wrap:wrap;padding-top:8px;padding-bottom:8px}.nav a{font-size:.78rem}.hero{padding-top:36px}.trace-scroll{max-height:250px}}
+@media(max-width:450px){.pipeline{grid-template-columns:1fr}.nav .wrap{gap:12px}.nav a:last-of-type{display:none}.nav button{font-size:.7rem}.metric strong{font-size:1.1rem}.hero-tags{gap:6px}.bitline b{width:80px;font-size:.7rem}}
+@media print{@page{size:A4;margin:16mm}html{scroll-padding-top:0}body{background:white;font-size:10pt;line-height:1.5}.wrap{padding:0;max-width:none}.hero{padding:5mm 0 6mm;background:white;color:#172a36;border-bottom:3px solid var(--teal)}.hero p,.hero .meta{color:#536772}.hero h1{font-size:29pt;max-width:650px;margin:10px 0}.hero .eyebrow{color:var(--teal)}.hero-tags,.nav,.no-print,button,.source-appendix{display:none!important}.print-only{display:block}main{padding:0}section.chapter{margin-top:8mm;padding-top:4mm;break-before:page}section.chapter:first-of-type{break-before:auto}h2{font-size:21pt}h3{font-size:13pt;margin-top:6mm}h2,h3,h4,summary{break-after:avoid}p{orphans:3;widows:3}.panel{padding:4mm;border:1px solid #ccd7d1}.lab-grid{grid-template-columns:1fr 1fr;gap:5mm}.columns{gap:5mm}.pipeline{grid-template-columns:repeat(3,1fr)}.panel,.metrics,.callout,.pipeline article,.chart,.result,.formula{break-inside:avoid}.metrics{gap:3mm}.metric{padding:3mm}.metric strong{font-size:14pt}.metric span{font-size:7pt}table{font-size:8pt;line-height:1.4}tr{break-inside:avoid}th,td{padding:2mm}.trace-scroll{max-height:none;overflow:visible}.scroll-table{overflow:visible}thead{display:table-header-group}.hex{font-size:7.8pt}.hex.address{font-size:10pt}.wallet-trace code{font-size:6.6pt}.hero p,.lead{font-size:10pt}.caption,.small,.sources,.status{font-size:8pt}details{border:none;padding:0}.sources a{color:#087e83;text-decoration:none}.sources a:after{content:''}.footer{font-size:7.5pt}.plot{max-height:83mm}a{color:var(--teal)}.stat-protocol{break-before:page}}
+
+@media print {main > section.chapter:first-of-type {break-before:auto;} .nav {display:none!important;}}
+</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+<div class="eyebrow">Cryptography · Homework 1.2</div>
+<h1>From mnemonic to Ethereum address</h1>
+<p>A practical cryptographic pipeline: mnemonic phrases, hierarchical key derivation, secp256k1, Keccak-256 and checksummed Ethereum addresses.</p>
+<div class="meta">Mattia Livieri · 15 October 2026</div>
+<div class="hero-tags"><span>Self-contained HTML / CSS / JavaScript</span><span>Works offline</span><span>Reproducible wallet pipeline</span><span>12 built-in checks</span></div>
+</div></header>
+<nav class="nav no-print" aria-label="Report navigation"><div class="wrap"><a href="#homework2">Report</a><a href="#wallet-lab">Wallet demo</a><a href="#wallet-statistics">Statistics</a><a href="#verification">Verification</a><a href="#references">References</a><button id="print-button" class="secondary">Print report</button></div></nav><main class="wrap"><noscript><div class="callout warn">Enable JavaScript to run the interactive experiments. The written report and saved reference outputs remain readable.</div></noscript><div class="callout small"><strong>How to use this submission.</strong> Open this file in a current browser. The live seed and HD-key calculations use the browser’s native Web Crypto API. Verified reference outputs and statistical results are embedded, so the report remains readable without running the experiments. All examples use public test data. This is an educational implementation, not a production wallet.</div><section class="chapter" id="homework2">
+<div class="chapter-number">HOMEWORK 1 · EXERCISE 2</div><h2>From mnemonic to checksummed Ethereum address</h2>
+<p class="lead">A conventional BIP-39/BIP-32 Ethereum wallet combines several primitives because generating secrets, deriving related accounts, signing messages, hashing data and detecting transcription mistakes are different problems. The pipeline below concerns an externally owned account (EOA), not a contract address.</p>
+<div class="pipeline" aria-label="Wallet pipeline in six numbered stages"><article><span>01 · BIP-39</span><strong>Mnemonic → seed</strong><p>Encode entropy as words; derive a 64-byte seed with PBKDF2-HMAC-SHA512.</p></article><article><span>02 · BIP-32 / BIP-44</span><strong>Seed → private key</strong><p>Derive an HD tree and select a leaf using a standard path.</p></article><article><span>03 · secp256k1</span><strong>Private → public key</strong><p>Compute Q = kG. The private key can later create digital signatures.</p></article><article><span>04 · Serialization</span><strong>Public point → bytes</strong><p>Use x || y, each coordinate 32 bytes. Omit the uncompressed 0x04 prefix.</p></article><article><span>05 · Keccak-256</span><strong>Public bytes → address</strong><p>Hash 64 bytes and retain the final 20 bytes: a 160-bit address.</p></article><article><span>06 · EIP-55</span><strong>Address → mixed case</strong><p>Encode error-detection information in the case of hexadecimal letters.</p></article></div>
+<h3>1. Role of each standard and primitive</h3>
+<table class="definition"><thead><tr><th>Technology</th><th>Role and purpose</th></tr></thead><tbody>
+<tr><td>BIP-39 <a href="#ref-39">[1]</a></td><td>Generate 128–256 random entropy bits in multiples of 32, append the first <code>ENT / 32</code> bits of SHA-256(entropy), and split into 11-bit indices in a 2,048-word list. This yields 12, 15, 18, 21 or 24 words. Normalize mnemonic and optional passphrase with UTF-8 NFKD. PBKDF2-HMAC-SHA512, 2,048 iterations, uses the mnemonic as password and <code>"mnemonic" + passphrase</code> as salt to derive a 64-byte seed.</td></tr>
+<tr><td>BIP-32 <a href="#ref-32">[2]</a></td><td>Derive a tree of extended keys from the seed using HMAC-SHA512. An extended private node contains a private scalar plus a 32-byte chain code. Both hardened and normal child derivations are supported; an extended public key can derive only normal public children.</td></tr>
+<tr><td>BIP-44 <a href="#ref-44">[3]</a></td><td>Assign meanings to levels in a BIP-32 tree: <code>m / purpose' / coin_type' / account' / change / address_index</code>. An example Ethereum path is <code>m/44'/60'/0'/0/0</code>: purpose 44, registered coin type 60, first account, external branch, first address. An apostrophe means hardened derivation. BIP-44 is a path convention, not a hash or a new source of randomness. <a href="#ref-slip">[4]</a></td></tr>
+<tr><td>secp256k1 <a href="#ref-sec">[5]</a></td><td>Define the elliptic-curve group and the relationship <code>Q = kG</code>. Ethereum EOA signatures use ECDSA over this curve: a private key signs and the public key verifies. Scalar multiplication derives the public key; it does not encrypt the private key, and a hash alone cannot replace a signature.</td></tr>
+<tr><td>Keccak-256 <a href="#ref-eth">[6]</a></td><td>Hash the 64-byte uncompressed coordinate sequence <code>x || y</code>, without the SEC1 prefix <code>04</code>. Retain the rightmost 20 digest bytes, then display them as 40 hex characters with the <code>0x</code> prefix. This address is an identifier derived from the public key, not the public key itself.</td></tr>
+<tr><td>EIP-55 <a href="#ref-55">[7]</a></td><td>Hash the lowercase 40-character hex address as ASCII, without <code>0x</code>, using Keccak-256. At each letter position, uppercase it if the corresponding digest hex digit is at least 8; otherwise use lowercase. Digits stay unchanged. The 20 address bytes do not change; capitalization carries checksum information.</td></tr>
+</tbody></table>
+<p>A BIP-39 passphrase is not the wallet application's local unlock password. Every passphrase produces a seed; a typo usually opens a different wallet rather than reporting an incorrect passphrase. Reproducing a wallet therefore requires the mnemonic, its exact optional passphrase, and the intended derivation path. BIP-39 is a common wallet convention, not an Ethereum consensus requirement; different wallets can support different recovery and path conventions. <a href="#ref-39">[1]</a></p>
+<h3>2. BIP-32 derivation in more detail</h3>
+<p>The master HMAC output is split into a scalar and chain code. Each child combines its parent's chain code, a serialized key and a child index. The word “Bitcoin” below is a literal BIP-32 domain string; its use also applies when the derived leaf is used for Ethereum.</p>
+<div class="formula">I = HMAC-SHA512(key = ASCII("Bitcoin seed"), data = seed)
+I = I_L || I_R  (32 bytes each)
+k_master = parse256(I_L);  c_master = I_R
+
+Normal child i &lt; 2³¹:
+  data = serP(Q_parent, compressed) || ser32(i)
+Hardened child i ≥ 2³¹:
+  data = 0x00 || ser256(k_parent) || ser32(i)
+
+I = HMAC-SHA512(key = c_parent, data = data)
+k_child = (parse256(I_L) + k_parent) mod n
+c_child = I_R</div>
+<p>All integers are serialized in big-endian form. For the master, <code>I_L = 0</code> or <code>I_L ≥ n</code> is invalid. For a child, <code>I_L ≥ n</code> or a zero resulting scalar is invalid and BIP-32 proceeds to the next index. The demo explicitly reports such a case instead of silently changing the displayed path. Hardened derivation uses <code>i = index + 2³¹</code> and requires private information. The public keys used internally for normal BIP-32 derivation are compressed; the 64-byte Ethereum address hash input is not. <a href="#ref-32">[2]</a></p>
+<h3>3. Key generation, derivation, hashing, checksums and encoding</h3>
+<table><thead><tr><th>Operation</th><th>What it does</th><th>Example in this pipeline</th></tr></thead><tbody><tr><td><strong>Key / entropy generation</strong></td><td>Introduces unpredictable secret material using a cryptographically secure random source.</td><td>Creating the original random entropy; alternatively sampling a direct private scalar in the valid range.</td></tr><tr><td><strong>Key derivation</strong></td><td>Deterministically computes key material from existing input; it creates no fresh entropy.</td><td>PBKDF2 seed derivation; HMAC-based HD child derivation. BIP-44 selects the path.</td></tr><tr><td><strong>Public-key cryptography</strong></td><td>Connects a secret signing key to a public verification key.</td><td>secp256k1 scalar multiplication and ECDSA.</td></tr><tr><td><strong>Hashing</strong></td><td>Maps data into a fixed-length digest with cryptographic resistance goals.</td><td>SHA-256 inside BIP-39; SHA-512 inside HMAC/PBKDF2; Keccak-256 for the address and EIP-55.</td></tr><tr><td><strong>Checksum</strong></td><td>Detects many accidental errors; does not authenticate ownership or stop deliberate forgery.</td><td>BIP-39 entropy checksum; EIP-55 capitalization.</td></tr><tr><td><strong>Encoding / serialization</strong></td><td>Represents information as words, bytes or text without inherently adding secrecy.</td><td>Word-list indices, coordinate bytes, hexadecimal text and the mixed-case address representation.</td></tr></tbody></table>
+
+<h3>4. Practical, reproducible wallet experiment</h3>
+<p>This experiment reconstructs the pipeline directly rather than relying on a wallet interface to hide its intermediate values. The mnemonic below is the public all-zero-entropy BIP-39 example. Its first eleven word indices are 0 (<code>abandon</code>) and its last index is 3 (<code>about</code>): 128 zero entropy bits followed by checksum bits <code>0011</code>. The program intentionally offers only this public mnemonic and two demonstration passphrases.</p>
+<div class="panel" id="wallet-lab">
+<div class="eyebrow">Executable experiment · public test mnemonic</div>
+<div class="value-label">12-word mnemonic · 128-bit entropy = 00000000000000000000000000000000</div><div class="hex">abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about</div>
+<div class="controls no-print"><label class="wide">Demonstration BIP-39 passphrase<select id="passphrase-select"><option value="">Empty passphrase (reference example)</option><option value="TREZOR">TREZOR (official BIP-39 test vector)</option></select></label><label>Address index<input id="address-index" type="number" min="0" max="255" step="1" value="0"></label><button id="derive-button">Derive address</button><button id="wallet-reset-button" class="secondary">Reset reference</button></div>
+<p id="wallet-status" class="status" role="status" aria-live="polite">Verified reference output shown below. Native cryptographic calculations run locally in your browser.</p>
+<div id="wallet-output" class="wallet-output"><div class="value-label">Derivation path · BIP-39 passphrase = (empty)</div><div class="hex">m/44'/60'/0'/0/0</div>
+  <div class="value-label">BIP-39 seed · 64 bytes</div><div class="hex">5eb00bbddcf069084889a8ab9155568165f5c453ccb85e70811aaed6f6da5fc19a5ac40b389cd370d086206dec8aa6c43daea6690f20ad3d8d48b2d2ce9e38e4</div>
+  <div class="value-label">Leaf private key · 32 bytes · public demonstration data</div><div class="hex">1ab42cc412b618bdea3a599e3c9bae199ebf030895b039e9db1e30dafb12b727</div>
+  <div class="value-label">Public key x || y · 64 bytes · no 04 prefix</div><div class="hex">37b0bb7a8288d38ed49a524b5dc98cff3eb5ca824c9f9dc0dfdb3d9cd600f299a6179912b7451c09896c4098eca7ce6b2e58330672795e847c4d6af44e024230</div>
+  <div class="value-label">Keccak-256(public key) · 32 bytes</div><div class="hex">515249c905300cbdd29f91a4<strong>9858effd232b4033e47d90003d41ec34ecaeda94</strong></div>
+  <div class="value-label">Last 20 bytes as lowercase hexadecimal</div><div class="hex">0x9858effd232b4033e47d90003d41ec34ecaeda94</div>
+  <div class="value-label">EIP-55 checksummed address · same 20 bytes</div><div class="hex address">0x9858EfFD232B4033E47d90003D41EC34EcaEda94</div>
+  <details><summary>Inspect every BIP-32 node: private scalar and chain code</summary><div class="scroll-table"><table class="wallet-trace"><thead><tr><th>Node</th><th>Private scalar (hex)</th><th>Chain code (hex)</th></tr></thead><tbody><tr><td>m</td><td><code>1837c1be8e2995ec11cda2b066151be2cfb48adf9e47b151d46adab3a21cdf67</code></td><td><code>7923408dadd3c7b56eed15567707ae5e5dca089de972e07f3b860450e2a3b70e</code></td></tr><tr><td>m/44'</td><td><code>cd46049fb82a4fccbd967c5234e61152f4df87d01d1ef833420814c67ee4b7ea</code></td><td><code>45d3b0e8206db10a08d555317c7e245c5bbd12254ce968f3c79a959d4e6af98a</code></td></tr><tr><td>m/44'/60'</td><td><code>eea62fd3712ad7ff27f7145280d07f0041a51ef2f35432d6b488cb294cf79bef</code></td><td><code>ff0603122d4dc5bf9b36606ef1b1b6e5a6c9e79fc6a4b08f7e871eee10457a71</code></td></tr><tr><td>m/44'/60'/0'</td><td><code>e9b91c428e679f857fbfa0203440eaeaabb0ca46d80e70b6aa6250696ac0dfc7</code></td><td><code>d882718b7a42806803eeb17f7483f20620611adb88fc943c898dc5aba94c2819</code></td></tr><tr><td>m/44'/60'/0'/0</td><td><code>a29ac2cb17e31cdab42a8fe2d83f04f4b69c5e73bc8d3bf6b5dc96ac239b145a</code></td><td><code>c879d136f02003dc804811e42390714ea06448aeaee158c62d65f12a421d988f</code></td></tr><tr><td>m/44'/60'/0'/0/0</td><td><code>1ab42cc412b618bdea3a599e3c9bae199ebf030895b039e9db1e30dafb12b727</code></td><td><code>736094f4f24b67e838a4b3d23d31d229ca03e00c9bb99ce95da6d86e8b3847b5</code></td></tr></tbody></table></div></details></div>
+</div>
+<p><strong>What changes?</strong> Keeping the mnemonic and passphrase fixed reproduces the same seed and keys. Increasing the final path index selects a different normal child without changing the seed. Switching to <code>TREZOR</code> changes the seed itself and therefore the entire HD tree. Changing only EIP-55 capitalization leaves the underlying 20-byte address unchanged.</p>
+<p>The local experiment makes no blockchain calls and does not simulate opening MetaMask, Rabby or another application. Creating an address is an offline computation; signing and broadcasting a transaction are separate operations. The JavaScript implements the secp256k1 and Keccak steps and uses native Web Crypto for SHA-2, HMAC and PBKDF2. It creates no signatures and stores no secrets.</p>
+
+<h3 class="stat-protocol" id="wallet-statistics">5. Statistical properties and measured results</h3>
+<p><strong>Experiment A — HD sibling outputs.</strong> Use the fixed public mnemonic, empty passphrase and paths <code>m/44'/60'/0'/0/i</code>, with <code>i = 0, …, 255</code>. Encode private scalars as 32 bytes, public points as 64 bytes <code>x || y</code>, full Keccak digests as 32 bytes, and addresses as 20 bytes. Count one bits over each complete representation. Count hex digits only in the lowercase 40-digit address, excluding <code>0x</code> and checksum capitalization.</p>
+<div class="panel"><div class="eyebrow">Saved results · 256 derived addresses</div><div id="wallet-bit-bars"><div class="bitline"><b>Private key</b><div class="track" aria-label="Private key one-bit percentage 49.7391"><i style="width:49.73907470703125%"></i></div><span class="number">49.74%</span></div><div class="bitline"><b>Public key</b><div class="track" aria-label="Public key one-bit percentage 49.8650"><i style="width:49.864959716796875%"></i></div><span class="number">49.86%</span></div><div class="bitline"><b>Full digest</b><div class="track" aria-label="Full digest one-bit percentage 50.1648"><i style="width:50.164794921875%"></i></div><span class="number">50.16%</span></div><div class="bitline"><b>Address</b><div class="track" aria-label="Address one-bit percentage 49.8438"><i style="width:49.84375%"></i></div><span class="number">49.84%</span></div></div>
+<div class="chart-title">Address hex-digit frequencies · expected count per digit = 640</div><svg id="address-histogram" class="chart" viewBox="0 0 900 235" role="img" aria-label="Observed frequencies of the sixteen hexadecimal digits across 256 addresses"></svg>
+<div id="wallet-stat-table"><table><thead><tr><th>Measurement</th><th>Observed result</th><th>Comparison / definition</th></tr></thead><tbody>
+  <tr><td>Private-key one bits</td><td>32,597 / 65,536 = 49.7391%</td><td>256 fixed-width 256-bit scalars</td></tr>
+  <tr><td>Public-key one bits</td><td>65,359 / 131,072 = 49.8650%</td><td>256 coordinate pairs, 512 bits each</td></tr>
+  <tr><td>Full digest one bits</td><td>32,876 / 65,536 = 50.1648%</td><td>256 full 256-bit Keccak digests</td></tr>
+  <tr><td>Address one bits</td><td>20,416 / 40,960 = 49.8438%</td><td>256 truncated 160-bit digests</td></tr>
+  <tr><td>Hex-digit count range</td><td>600–703</td><td>Expected count = 640 for each of 16 digits</td></tr>
+  <tr><td>χ² for hex-digit counts</td><td>19.10625</td><td>15 degrees of freedom under the simple uniform model</td></tr>
+  <tr><td>Adjacent address distance</td><td>79.6196 / 160 bits</td><td>255 adjacent-index comparisons; idealized mean 80</td></tr>
+  <tr><td>Keccak one-input-bit distance</td><td>127.9296 / 256 bits</td><td>8,192 directed trials; idealized mean 128</td></tr>
+  </tbody></table></div>
+<div class="actions no-print"><button id="stats-button">Recompute both experiments</button><span id="stats-status" class="status" role="status" aria-live="polite">Saved results are embedded and reproducible.</span></div>
+</div>
+<p>Experiment A gives <strong>256 distinct addresses</strong>. The 10,240 hex digits have a Pearson chi-square statistic <code>χ² = 19.10625</code> against equal expected frequencies of 640 (15 degrees of freedom). This is a descriptive comparison with a simple uniform model; it is not a certification of uniformity or cryptographic security. Pearson correlation between the index and the leading 32-bit key word is <code>0.109930</code>; for the leading 32-bit address word it is <code>−0.001308</code>. These specific, limited projections do not test all dependencies. Adjacent address indices differ in an average of <code>79.6196 / 160</code> address bits, near the idealized independent-bit expectation of 80. Adjacent indices may differ in several input bits, so that last measurement is not a strict avalanche test.</p>
+<p><strong>Experiment B — controlled Keccak diffusion.</strong> For each four-byte, big-endian message <code>ser32(i)</code>, with <code>i = 0, …, 255</code>, toggle each of its 32 input bits separately and compare the 256-bit digests. The <strong>8,192 directed one-bit trials</strong> give a mean Hamming distance of <strong>127.9296 / 256 bits</strong> (49.9725%), with range 100–157. The idealized fair-bit expectation is 128. Some message pairs are visited in both directions; the observations are not all independent. The sample shows diffusion consistent with avalanche-like behavior but cannot establish the strict avalanche criterion or any resistance to preimages or collisions.</p>
+<h4>Interpretation by stage</h4>
+<p><strong>Mnemonic and seed.</strong> A valid 12-word BIP-39 phrase encodes 128 entropy bits plus four checksum bits, not 132 independently random bits. Only one sixteenth of arbitrary 12-word strings passes that checksum under the uniform-bit model. PBKDF2's 512-bit seed length does not turn 128 bits of entropy into 512 bits of security; a strong optional passphrase may add secret entropy, while a predictable one adds little. The repeated public mnemonic in this experiment has no secrecy.</p>
+<p><strong>HD keys and public points.</strong> HMAC-based child material should look pseudorandom to an observer lacking the required secret information, but the derivation is deterministic and its nodes are not new independent random draws. The valid scalar range and curve equation constrain the outputs. A 512-bit point serialization does not contain 512 independent random bits; the point contains approximately 256 bits of information. Balanced bit counts are useful diagnostics, not security proofs.</p>
+<p><strong>Hashes and addresses.</strong> Well-designed hashes aim for preimage, second-preimage and collision resistance; balanced output bits and diffusion are observable supporting behaviors. Taking 20 bytes restricts addresses to a 160-bit space. In an idealized model, generic target-preimage search scales as <code>2¹⁶⁰</code> trials and generic birthday collisions as <code>2⁸⁰</code>, independently of the approximately 128-bit generic ECDLP security for a known secp256k1 public key. Finding some address collision is not automatically a way to take control of a particular existing account. No repeated address among 256 samples is unsurprising and cannot establish collision resistance.</p>
+<p><strong>Checksum encoding.</strong> EIP-55 intentionally correlates letter case with a hash of the address. Case bits are neither extra address entropy nor proof of identity. The specification reports an average of 15 check bits and approximately 0.0247% accidental acceptance for its random mistype model; this is not a universal probability for every error pattern or an adversarial guarantee. <a href="#ref-55">[7]</a></p>
+
+<h3>6. SHA-2 / SHA-512 versus Keccak / SHA-3</h3>
+<table><thead><tr><th>Aspect</th><th>SHA-2 / SHA-512</th><th>Keccak / SHA-3</th></tr></thead><tbody><tr><td>Design family</td><td>SHA-2 uses an iterative compression-function structure. SHA-512 produces a 512-bit digest.</td><td>Keccak uses a sponge construction built from a permutation. NIST selected Keccak as the basis of SHA-3.</td></tr><tr><td>Role here</td><td>SHA-256 supplies BIP-39 checksum bits; HMAC-SHA512 supports PBKDF2 and BIP-32.</td><td>Ethereum uses Keccak-256 for EOA address derivation and EIP-55.</td></tr><tr><td>Compatibility</td><td>SHA-512 is not Keccak and cannot replace it while preserving outputs.</td><td>Ethereum's Keccak-256 is not standardized SHA3-256: their padding/domain-separation conventions differ.</td></tr></tbody></table>
+<div class="formula">Input: empty byte string
+Keccak-256 = c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+SHA3-256   = a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a</div>
+<p>Both 256-bit functions use the Keccak-f[1600] permutation with rate 1,088 bits and capacity 512 bits, but legacy Keccak-256 uses the byte-level delimited suffix <code>0x01</code>, whereas SHA3-256 uses <code>0x06</code>, followed by the final padding bit. Consequently, a function named <code>sha3_256</code> is not a drop-in Ethereum Keccak implementation. The distinct empty-input outputs above are also checked by the program. <a href="#ref-sha3">[10]</a> <a href="#ref-keccak">[12]</a></p>
+
+<h3>7. Temporal and historical context</h3>
+<table class="timeline"><thead><tr><th>Date</th><th>Development</th><th>Historical significance</th></tr></thead><tbody><tr><td>1977</td><td>RSA introduced</td><td>Rivest, Shamir and Adleman developed a public-key system supporting encryption and signatures. The well-known journal paper appeared in 1978. RSA is historical context here, not a step in this Ethereum pipeline. <a href="#ref-rsa">[11]</a></td></tr><tr><td>2001 → 2002</td><td>SHA-2 / SHA-512</td><td>NIST announced draft FIPS 180-2 in May 2001; the final standard was published in August 2002. Thus “standardized in 2001” in the prompt is an approximate shorthand for the draft period, not the final publication date. <a href="#ref-sha2draft">[8]</a> <a href="#ref-sha2">[9]</a></td></tr><tr><td>2012</td><td>BIP-32</td><td>HD wallet proposal assigned 11 February 2012; later revisions refined derivation and hardened keys. <a href="#ref-32">[2]</a></td></tr><tr><td>2013</td><td>BIP-39</td><td>Mnemonic-based deterministic-wallet proposal assigned 10 September 2013. <a href="#ref-39">[1]</a></td></tr><tr><td>2014</td><td>BIP-44</td><td>Multi-account, multi-coin path convention assigned 24 April 2014. <a href="#ref-44">[3]</a></td></tr><tr><td>2015</td><td>SHA-3 standardized</td><td>NIST published FIPS 202 in August 2015, based on Keccak. Standardizing SHA-3 did not make legacy Keccak-256 identical to SHA3-256. <a href="#ref-sha3">[10]</a></td></tr><tr><td>2016</td><td>EIP-55</td><td>Mixed-case Ethereum address checksum proposal created 14 January 2016. <a href="#ref-55">[7]</a></td></tr></tbody></table>
+<h3>8. Why not use a single algorithm for everything?</h3>
+<p>BIP-39 makes a backup human-readable and derives seed material; BIP-32 builds a reproducible account tree; BIP-44 tells compatible software where to look. secp256k1 supplies an asymmetric relationship so a secret key can sign while its public counterpart verifies. Keccak-256 produces fixed-size digests and compact address identifiers. EIP-55 adds transcription-error detection to a human-facing representation.</p>
+<p>These guarantees are not interchangeable. A hash of a secret does not, by itself, create a digital-signature scheme. An elliptic-curve public point is not a mnemonic backup or a general-purpose digest. A checksum can be recomputed by anyone and does not establish ownership. Encoding changes representation, not the underlying secret's unpredictability. The pipeline works by composing primitives with different, explicit roles and by using the required byte formats at each boundary.</p>
+</section>
+
+<section class="chapter" id="verification"><div class="chapter-number">REPRODUCIBILITY</div><h2>Verification and implementation notes</h2><p>The saved results were generated by the JavaScript included in this file. Both demonstration seeds, all six nodes in each derivation trace, and the corresponding secp256k1 public keys were also checked independently with Python’s hashlib/hmac and the cryptography library. Keccak and EIP-55 are checked against known-answer examples. The twelve built-in checks below can be rerun in the browser.</p><div class="panel"><div class="actions no-print"><button id="check-button">Run verification checks</button></div><div id="checks-status" class="status" role="status" aria-live="polite">Saved verification: 12 checks passed.</div><ul id="checks-list" class="checks-list"><li class="pass"><strong>PASS</strong> · Keccak-256 empty-string vector</li><li class="pass"><strong>PASS</strong> · Keccak-256 abc vector</li><li class="pass"><strong>PASS</strong> · SHA3-256 empty-string vector (different suffix)</li><li class="pass"><strong>PASS</strong> · Four published EIP-55 address vectors</li><li class="pass"><strong>PASS</strong> · secp256k1: 1G = G</li><li class="pass"><strong>PASS</strong> · secp256k1: (n-1)G = -G</li><li class="pass"><strong>PASS</strong> · Public key k = 1 gives known Ethereum address</li><li class="pass"><strong>PASS</strong> · Official BIP-39 TREZOR seed vector</li><li class="pass"><strong>PASS</strong> · BIP-32 vector 1: master private key</li><li class="pass"><strong>PASS</strong> · BIP-32 vector 1: master chain code</li><li class="pass"><strong>PASS</strong> · Full demo pipeline: known first Ethereum address</li><li class="pass"><strong>PASS</strong> · Demo BIP-39 checksum: first four SHA-256 bits = 0011</li></ul></div><p class="small"><strong>Implementation scope.</strong> This file contains the complete report, fixed fixtures and executable code for Homework 1.2. No external libraries, fonts, servers or accounts are required. BigInt implements secp256k1 arithmetic with Jacobian coordinates; Web Crypto supplies SHA-256, HMAC-SHA512 and PBKDF2. The public test mnemonic is not a general mnemonic generator or validator. This educational implementation does not provide constant-time arithmetic, key protection or transaction signing.</p><p class="small">If crypto.subtle is unavailable in the browser context, the saved report and the pure-JavaScript Keccak checks remain available, while live BIP-39/BIP-32 derivation is disabled with an explanation. Recomputing the statistical experiments always uses the fixed reference dataset, regardless of the wallet demo’s selected passphrase or index.</p></section><section class="chapter" id="references"><div class="chapter-number">PRIMARY SOURCES</div><h2>References</h2>
+<p class="small muted">Specifications and primary historical sources consulted on 15 October 2026. Explanations, experimental protocol and code in this submission are original; specifications define the interoperable behavior.</p>
+<ol class="sources"><li id="ref-39"><strong>BIP-39 — Mnemonic code for generating deterministic keys.</strong> <a href="https://bips.dev/39/">https://bips.dev/39/</a>. Public seed vectors: <a href="https://github.com/trezor/python-mnemonic/blob/master/vectors.json">Trezor python-mnemonic vectors.json</a>.</li><li id="ref-32"><strong>BIP-32 — Hierarchical Deterministic Wallets.</strong> <a href="https://bips.dev/32/">https://bips.dev/32/</a>.</li><li id="ref-44"><strong>BIP-44 — Multi-Account Hierarchy for Deterministic Wallets.</strong> <a href="https://bips.dev/44/">https://bips.dev/44/</a>.</li><li id="ref-slip"><strong>SLIP-0044 — Registered coin types for BIP-0044.</strong> Ethereum registration, coin type 60. <a href="https://github.com/satoshilabs/slips/blob/master/slip-0044.md">https://github.com/satoshilabs/slips/blob/master/slip-0044.md</a>.</li><li id="ref-sec"><strong>SEC 2, version 2.0, §2.4.1 — secp256k1 parameters.</strong> Standards for Efficient Cryptography Group. <a href="https://www.secg.org/sec2-v2.pdf">https://www.secg.org/sec2-v2.pdf</a>.</li><li id="ref-eth"><strong>Ethereum developer documentation — Accounts.</strong> <a href="https://ethereum.org/en/developers/docs/accounts/">https://ethereum.org/en/developers/docs/accounts/</a>.</li><li id="ref-55"><strong>EIP-55 / ERC-55 — Mixed-case checksum address encoding.</strong> <a href="https://eips.ethereum.org/EIPS/eip-55">https://eips.ethereum.org/EIPS/eip-55</a>.</li><li id="ref-sha2draft"><strong>NIST — Draft FIPS 180-2 announcement, 30 May 2001.</strong> <a href="https://csrc.nist.gov/News/2001/Announcing-Draft-FIPS-180-2-and-Request-for-Commen">NIST draft announcement</a>.</li><li id="ref-sha2"><strong>NIST FIPS 180-2 — Secure Hash Standard, August 2002.</strong> <a href="https://csrc.nist.gov/pubs/fips/180-2/final">https://csrc.nist.gov/pubs/fips/180-2/final</a>.</li><li id="ref-sha3"><strong>NIST FIPS 202 — SHA-3 Standard, August 2015.</strong> <a href="https://csrc.nist.gov/pubs/fips/202/final">https://csrc.nist.gov/pubs/fips/202/final</a>.</li><li id="ref-rsa"><strong>RSA history and original publication.</strong> <a href="https://www.rsa.com/company/rsa-cryptography/">RSA: algorithm introduced in 1977</a>; Rivest, Shamir and Adleman, <em>A Method for Obtaining Digital Signatures and Public-Key Cryptosystems</em>, CACM 21(2), 1978, pp. 120–126: <a href="https://people.csail.mit.edu/rivest/pubs.html">Rivest's publication list</a>.</li><li id="ref-keccak"><strong>Keccak Team — Specifications summary.</strong> Keccak permutation, sponge parameters and SHA-3 domain suffixes. <a href="https://keccak.team/keccak_specs_summary.html">https://keccak.team/keccak_specs_summary.html</a>.</li></ol>
+</section>
+<footer class="footer">Cryptography Homework 1.2 · Mattia Livieri · Complete source code and numerical results are included in this file.</footer></main><script id="reference-data" type="application/json">{"demo":{"mnemonic":"abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about","passphrase":"","index":0,"seed":"5eb00bbddcf069084889a8ab9155568165f5c453ccb85e70811aaed6f6da5fc19a5ac40b389cd370d086206dec8aa6c43daea6690f20ad3d8d48b2d2ce9e38e4","path":"m/44'/60'/0'/0/0","trace":[{"path":"m","key":"1837c1be8e2995ec11cda2b066151be2cfb48adf9e47b151d46adab3a21cdf67","chain":"7923408dadd3c7b56eed15567707ae5e5dca089de972e07f3b860450e2a3b70e"},{"path":"m/44'","key":"cd46049fb82a4fccbd967c5234e61152f4df87d01d1ef833420814c67ee4b7ea","chain":"45d3b0e8206db10a08d555317c7e245c5bbd12254ce968f3c79a959d4e6af98a"},{"path":"m/44'/60'","key":"eea62fd3712ad7ff27f7145280d07f0041a51ef2f35432d6b488cb294cf79bef","chain":"ff0603122d4dc5bf9b36606ef1b1b6e5a6c9e79fc6a4b08f7e871eee10457a71"},{"path":"m/44'/60'/0'","key":"e9b91c428e679f857fbfa0203440eaeaabb0ca46d80e70b6aa6250696ac0dfc7","chain":"d882718b7a42806803eeb17f7483f20620611adb88fc943c898dc5aba94c2819"},{"path":"m/44'/60'/0'/0","key":"a29ac2cb17e31cdab42a8fe2d83f04f4b69c5e73bc8d3bf6b5dc96ac239b145a","chain":"c879d136f02003dc804811e42390714ea06448aeaee158c62d65f12a421d988f"},{"path":"m/44'/60'/0'/0/0","key":"1ab42cc412b618bdea3a599e3c9bae199ebf030895b039e9db1e30dafb12b727","chain":"736094f4f24b67e838a4b3d23d31d229ca03e00c9bb99ce95da6d86e8b3847b5"}],"privateKey":"1ab42cc412b618bdea3a599e3c9bae199ebf030895b039e9db1e30dafb12b727","publicKey":"37b0bb7a8288d38ed49a524b5dc98cff3eb5ca824c9f9dc0dfdb3d9cd600f299a6179912b7451c09896c4098eca7ce6b2e58330672795e847c4d6af44e024230","digest":"515249c905300cbdd29f91a49858effd232b4033e47d90003d41ec34ecaeda94","address":"0x9858effd232b4033e47d90003d41ec34ecaeda94","checksummed":"0x9858EfFD232B4033E47d90003D41EC34EcaEda94"},"alternate":{"mnemonic":"abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about","passphrase":"TREZOR","index":0,"seed":"c55257c360c07c72029aebc1b53c05ed0362ada38ead3e3e9efa3708e53495531f09a6987599d18264c1e1c92f2cf141630c7a3c4ab7c81b2f001698e7463b04","path":"m/44'/60'/0'/0/0","trace":[{"path":"m","key":"cbedc75b0d6412c85c79bc13875112ef912fd1e756631b5a00330866f22ff184","chain":"a3fa8c983223306de0f0f65e74ebb1e98aba751633bf91d5fb56529aa5c132c1"},{"path":"m/44'","key":"a7bc0e57104799aa595b8c0badf1efc89e7117bcf3f6a769931d590610e00275","chain":"8a406c213a428d387996061d2a8371540856fa1e4a9f50e452733d573729d358"},{"path":"m/44'/60'","key":"e04b7bb1896e3d8019d07aea597ad103410533492e4398a7a775a93358b155fb","chain":"28e48eecf4aeb53df5d3cb423beb6dc25cdfc5b8b88faf8229ed9980b785cf0b"},{"path":"m/44'/60'/0'","key":"589f21b00d27b2110ded600f5f56da3f13c74fd313348693473fa9f15c98c095","chain":"4c661f1e1270827500d0095aae896f1ff515aaa189d622c2aafd40c957772e56"},{"path":"m/44'/60'/0'/0","key":"3880600e9d01072548e8f420c8425cb0bc450743ad0e910350f8341e53af31f8","chain":"1cc583d4a7de43f74ca986218c67c43baaad4e6285fa1bc2bbd5a6d5d00e07d1"},{"path":"m/44'/60'/0'/0/0","key":"62f1d86b246c81bdd8f6c166d56896a4a5e1eddbcaebe06480e5c0bc74c28224","chain":"c4f46d54e7a5942ee812ddba88520143393466951b69a7d5f0c0659c94cca7ec"}],"privateKey":"62f1d86b246c81bdd8f6c166d56896a4a5e1eddbcaebe06480e5c0bc74c28224","publicKey":"986dee3b8afe24cb8ccb2ac23dac3f8c43d22850d14b809b26d6b8aa5a1f47784152cd2c7d9edd0ab20392a837464b5a750b2a7f3f06e6a5756b5211b6a6ed05","digest":"0bd327d22d48a0c851efe43d9c32f71d4db8fb9e1a58b0a80df79935e7256fa6","address":"0x9c32f71d4db8fb9e1a58b0a80df79935e7256fa6","checksummed":"0x9c32F71D4DB8Fb9e1A58B0a80dF79935e7256FA6"},"stats":{"samples":256,"keys":{"ones":32597,"total":65536,"percent":49.73907470703125,"position":[116,126,131,129,130,129,128,128,143,125,126,129,118,110,111,129,132,111,115,124,118,129,123,123,123,126,115,138,128,135,136,124,120,125,128,139,137,132,115,120,127,123,136,115,129,126,127,128,120,118,128,124,129,125,123,140,133,134,133,129,115,123,129,127,115,121,136,126,129,133,144,130,117,128,142,115,127,134,153,119,130,133,113,121,129,119,125,124,128,136,124,135,124,112,123,127,134,117,136,128,138,123,123,124,125,137,117,131,133,131,136,152,147,125,133,113,131,118,137,114,120,133,121,122,126,120,127,125,132,127,124,142,133,116,137,129,133,140,120,131,144,127,131,134,109,125,121,121,121,125,135,136,130,126,126,133,131,123,115,116,123,130,148,127,123,129,122,128,140,131,140,129,124,123,128,122,106,115,132,137,137,129,120,145,123,127,125,132,127,123,133,119,133,121,124,115,123,123,135,133,107,133,134,123,142,121,125,123,119,128,124,122,132,118,141,139,118,120,126,122,133,135,118,135,135,130,134,123,130,133,138,125,125,135,136,130,126,118,116,131,130,140,136,121,123,130,126,133,127,118,146,131,114,133,129,126]},"publicKeys":{"ones":65359,"total":131072,"percent":49.864959716796875,"position":[129,123,121,137,139,126,122,121,132,120,119,125,133,117,124,138,120,122,127,136,134,115,132,137,131,132,118,122,127,130,126,122,134,127,118,131,121,122,128,133,135,128,138,135,140,114,138,133,126,134,108,144,132,123,129,128,136,133,125,107,124,123,138,134,135,122,123,146,134,139,127,129,121,122,115,129,135,128,133,129,116,144,114,135,125,140,136,132,132,121,110,115,125,142,136,118,134,127,133,125,127,113,121,131,122,128,126,137,128,126,140,121,125,130,119,124,137,110,121,128,134,120,131,128,131,121,115,150,119,127,119,137,130,121,116,130,124,147,126,124,118,131,127,114,126,125,134,126,124,139,133,149,129,137,128,125,117,132,135,117,129,127,140,125,129,121,122,115,122,137,117,120,118,128,115,132,129,142,120,122,120,134,127,120,130,131,126,116,133,122,149,112,139,137,118,121,139,115,143,117,112,133,138,116,139,124,128,133,126,140,126,118,137,121,121,123,139,119,134,125,136,129,136,137,129,129,143,116,134,135,113,127,134,131,123,128,138,129,129,133,143,128,120,121,126,125,132,120,129,140,130,134,131,119,135,140,122,135,133,124,126,135,122,133,116,125,131,120,126,123,138,138,136,136,155,131,119,127,120,134,128,127,136,124,135,125,108,141,137,127,115,120,124,135,133,130,141,133,111,134,127,116,128,123,114,116,138,125,127,113,130,124,121,132,136,143,143,131,124,118,126,139,131,134,125,123,113,116,122,124,115,115,120,115,137,126,127,129,118,133,128,119,128,113,136,122,143,131,137,131,135,123,121,128,127,124,127,119,137,135,116,120,119,137,119,126,123,142,133,132,127,138,125,136,117,122,125,120,136,126,151,121,125,128,124,127,117,110,144,121,138,127,139,126,122,127,129,111,122,120,135,147,133,132,136,127,119,120,120,116,123,127,143,131,127,133,122,113,115,140,136,121,137,133,132,119,131,131,133,128,130,137,119,125,126,119,127,127,135,115,132,132,144,133,133,127,120,128,124,116,123,130,123,123,128,124,118,145,132,149,117,114,133,127,147,117,116,132,123,149,122,131,123,136,116,121,123,128,122,140,126,133,121,126,135,137,107,132,127,133,138,131,119,120,131,122,142,124,119,126,127,111,133,139,135,114,131,137,132,131,120,115]},"hashes":{"ones":32876,"total":65536,"percent":50.164794921875,"position":[129,126,123,129,112,127,131,125,125,132,121,133,126,131,136,141,129,128,129,127,134,122,141,126,139,112,134,139,119,136,136,141,119,132,128,127,125,132,123,144,128,145,129,118,132,128,133,128,127,138,119,125,134,126,132,121,140,133,131,128,129,139,126,133,119,137,134,125,127,132,128,120,134,129,132,137,127,137,135,128,138,128,136,123,129,114,142,130,127,123,141,127,118,135,138,139,133,139,114,127,124,130,145,124,128,117,121,144,131,122,129,111,127,117,132,124,118,132,132,128,122,130,116,124,129,126,127,133,127,139,134,136,125,128,137,139,124,127,123,134,147,135,133,120,130,126,127,130,127,133,127,116,136,137,111,126,115,132,118,127,128,128,134,125,139,139,122,139,126,121,114,121,132,130,130,128,129,123,129,132,122,133,135,130,118,126,118,130,131,136,117,119,133,121,140,130,121,120,132,124,124,133,114,114,129,130,122,119,123,126,135,124,142,121,117,116,123,139,136,137,133,126,137,127,122,123,127,133,123,123,123,137,126,115,118,117,140,135,125,129,124,134,130,135,125,117,128,138,136,132,128,125,127,127,128,132]},"addresses":{"ones":20416,"total":40960,"percent":49.84375,"position":[133,139,114,127,124,130,145,124,128,117,121,144,131,122,129,111,127,117,132,124,118,132,132,128,122,130,116,124,129,126,127,133,127,139,134,136,125,128,137,139,124,127,123,134,147,135,133,120,130,126,127,130,127,133,127,116,136,137,111,126,115,132,118,127,128,128,134,125,139,139,122,139,126,121,114,121,132,130,130,128,129,123,129,132,122,133,135,130,118,126,118,130,131,136,117,119,133,121,140,130,121,120,132,124,124,133,114,114,129,130,122,119,123,126,135,124,142,121,117,116,123,139,136,137,133,126,137,127,122,123,127,133,123,123,123,137,126,115,118,117,140,135,125,129,124,134,130,135,125,117,128,138,136,132,128,125,127,127,128,132]},"hist":[629,703,617,640,642,639,630,621,675,615,633,600,667,605,643,681],"expectedNibbleCount":640,"chiSquare":19.10625,"inputKeyCorrelation":0.10993002482701475,"inputAddressCorrelation":-0.0013077998913060302,"adjacentAddressHamming":79.61960784313726,"avalanche":{"pairs":8192,"mean":127.9295654296875,"min":100,"max":157},"distinctAddresses":256},"checks":[{"name":"Keccak-256 empty-string vector","ok":true},{"name":"Keccak-256 abc vector","ok":true},{"name":"SHA3-256 empty-string vector (different suffix)","ok":true},{"name":"Four published EIP-55 address vectors","ok":true},{"name":"secp256k1: 1G = G","ok":true},{"name":"secp256k1: (n-1)G = -G","ok":true},{"name":"Public key k = 1 gives known Ethereum address","ok":true},{"name":"Official BIP-39 TREZOR seed vector","ok":true},{"name":"BIP-32 vector 1: master private key","ok":true},{"name":"BIP-32 vector 1: master chain code","ok":true},{"name":"Full demo pipeline: known first Ethereum address","ok":true},{"name":"Demo BIP-39 checksum: first four SHA-256 bits = 0011","ok":true}]}</script><script>
+/* Cryptography Homework 2. Educational code; public test data only.
+ * No network requests, dependencies, signing, or persistent storage.
+ * SHA-2, HMAC and PBKDF2 use the browser's native Web Crypto API.
+ */
+'use strict';
+const ENC = new TextEncoder();
+const bytes = text => ENC.encode(text);
+const hex = data => Array.from(data, b => b.toString(16).padStart(2, '0')).join('');
+function unhex(text) {
+  if (!/^(?:[0-9a-f]{2})*$/i.test(text)) throw new Error('Invalid hexadecimal input');
+  return Uint8Array.from(text.match(/../g) || [], h => parseInt(h, 16));
+}
+function concat(...arrays) {
+  const out = new Uint8Array(arrays.reduce((n, a) => n + a.length, 0));
+  let offset = 0;
+  for (const a of arrays) { out.set(a, offset); offset += a.length; }
+  return out;
+}
+const big = data => BigInt('0x' + hex(data));
+function ser256(n) { return unhex(n.toString(16).padStart(64, '0')); }
+function ser32(n) {
+  if (!Number.isInteger(n) || n < 0 || n > 0xffffffff) throw new Error('Invalid child index');
+  const a = new Uint8Array(4); new DataView(a.buffer).setUint32(0, n, false); return a;
+}
+function mod(n, p) { return ((n % p) + p) % p; }
+function inverse(n, p) {
+  let a = mod(n, p), b = p, x = 1n, y = 0n;
+  while (b !== 0n) { const q = a / b; [a, b] = [b, a - q * b]; [x, y] = [y, x - q * y]; }
+  if (a !== 1n) throw new Error('No modular inverse');
+  return mod(x, p);
+}
+
+function bitCount(n) { let c = 0; while (n) { n &= n - 1; c++; } return c; }
+function hamming(a, b) { let n = 0; for (let i = 0; i < a.length; i++) n += bitCount(a[i] ^ b[i]); return n; }
+function pearson(xs, ys) {
+  const n = xs.length, mx = xs.reduce((a,b) => a+b,0)/n, my = ys.reduce((a,b) => a+b,0)/n;
+  let v = 0, xx = 0, yy = 0;
+  for (let i = 0; i < n; i++) { const dx=xs[i]-mx, dy=ys[i]-my; v+=dx*dy; xx+=dx*dx; yy+=dy*dy; }
+  return xx === 0 || yy === 0 ? null : v / Math.sqrt(xx * yy);
+}
+// Homework 2: Keccak-f[1600], with 24 rounds and 64-bit little-endian lanes.
+// Ethereum Keccak-256 uses suffix 0x01; SHA3-256 uses 0x06.
+const MASK64 = (1n << 64n) - 1n;
+const KECCAK_RC = [
+  0x0000000000000001n,0x0000000000008082n,0x800000000000808an,0x8000000080008000n,
+  0x000000000000808bn,0x0000000080000001n,0x8000000080008081n,0x8000000000008009n,
+  0x000000000000008an,0x0000000000000088n,0x0000000080008009n,0x000000008000000an,
+  0x000000008000808bn,0x800000000000008bn,0x8000000000008089n,0x8000000000008003n,
+  0x8000000000008002n,0x8000000000000080n,0x000000000000800an,0x800000008000000an,
+  0x8000000080008081n,0x8000000000008080n,0x0000000080000001n,0x8000000080008008n];
+const KECCAK_ROT = [0,1,62,28,27,36,44,6,55,20,3,10,43,25,39,41,45,15,21,8,18,2,61,56,14];
+const rot64 = (v,n) => n === 0 ? v : ((v << BigInt(n)) | (v >> BigInt(64-n))) & MASK64;
+function keccakPermutation(A) {
+  for (const rc of KECCAK_RC) {
+    const C = Array(5), D = Array(5), B = Array(25);
+    for (let x=0;x<5;x++) C[x]=A[x]^A[x+5]^A[x+10]^A[x+15]^A[x+20];
+    for (let x=0;x<5;x++) D[x]=C[(x+4)%5]^rot64(C[(x+1)%5],1);
+    for (let x=0;x<5;x++) for (let y=0;y<5;y++) {
+      const i=x+5*y; A[i]^=D[x]; B[y+5*((2*x+3*y)%5)]=rot64(A[i],KECCAK_ROT[i]);
+    }
+    for (let x=0;x<5;x++) for (let y=0;y<5;y++) A[x+5*y]=(B[x+5*y]^((~B[(x+1)%5+5*y])&B[(x+2)%5+5*y]))&MASK64;
+    A[0]^=rc;
+  }
+}
+function keccak256(message, suffix=0x01) {
+  const rate=136, padded=new Uint8Array(Math.ceil((message.length+1)/rate)*rate);
+  padded.set(message); padded[message.length]^=suffix; padded[padded.length-1]^=0x80;
+  const A=Array(25).fill(0n);
+  for (let offset=0;offset<padded.length;offset+=rate) {
+    for (let j=0;j<rate;j++) A[Math.floor(j/8)]^=BigInt(padded[offset+j])<<BigInt(8*(j%8));
+    keccakPermutation(A);
+  }
+  return Uint8Array.from({length:32},(_,j)=>Number((A[Math.floor(j/8)]>>BigInt(8*(j%8)))&255n));
+}
+function checksumAddress(address) {
+  const lower=address.replace(/^0x/i,'').toLowerCase();
+  if (!/^[0-9a-f]{40}$/.test(lower)) throw new Error('An address must contain 20 bytes');
+  // Hash 40 lowercase ASCII hex characters, without 0x, not the 20 raw bytes.
+  const digest=hex(keccak256(bytes(lower)));
+  return '0x'+Array.from(lower,(c,i)=>/[a-f]/.test(c)&&parseInt(digest[i],16)>=8?c.toUpperCase():c).join('');
+}
+
+// secp256k1 uses the same equation as the toy curve but a different field.
+const SECP_P = (1n<<256n)-(1n<<32n)-977n;
+const SECP_N = 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141n;
+const SECP_G = {
+ x:0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798n,
+ y:0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8n};
+const fp = n => mod(n,SECP_P);
+// Jacobian coordinates avoid an expensive inversion at every group operation.
+const J_INFINITY = {x:0n,y:1n,z:0n};
+function jacDouble(P) {
+  if (P.z===0n || P.y===0n) return J_INFINITY;
+  const A=fp(P.x*P.x),B=fp(P.y*P.y),C=fp(B*B);
+  const D=fp(2n*(fp((P.x+B)*(P.x+B))-A-C)),E=fp(3n*A),F=fp(E*E);
+  const x=fp(F-2n*D), y=fp(E*(D-x)-8n*C), z=fp(2n*P.y*P.z);
+  return {x,y,z};
+}
+function jacAddAffine(P,Q) {
+  if (P.z===0n) return {x:Q.x,y:Q.y,z:1n};
+  const zz=fp(P.z*P.z),u=fp(Q.x*zz),s=fp(Q.y*P.z*zz),h=fp(u-P.x);
+  const r=fp(2n*(s-P.y));
+  if (h===0n) return r===0n ? jacDouble(P) : J_INFINITY;
+  const hh=fp(h*h),i=fp(4n*hh),j=fp(h*i),v=fp(P.x*i);
+  const x=fp(r*r-j-2n*v),y=fp(r*(v-x)-2n*P.y*j),z=fp((P.z+h)*(P.z+h)-zz-hh);
+  return {x,y,z};
+}
+function secpMultiply(k) {
+  if (k<=0n || k>=SECP_N) throw new Error('Invalid secp256k1 private key');
+  let R=J_INFINITY;
+  for (const digit of k.toString(2)) { R=jacDouble(R); if (digit==='1') R=jacAddAffine(R,SECP_G); }
+  const iz=inverse(R.z,SECP_P),iz2=fp(iz*iz);
+  return {x:fp(R.x*iz2),y:fp(R.y*iz2*iz)};
+}
+const publicBytes = Q => concat(ser256(Q.x),ser256(Q.y));
+const compressedBytes = Q => concat(Uint8Array.of(Number(Q.y&1n)+2),ser256(Q.x));
+async function hmac512(key,data) {
+  const K=await globalThis.crypto.subtle.importKey('raw',key,{name:'HMAC',hash:'SHA-512'},false,['sign']);
+  return new Uint8Array(await globalThis.crypto.subtle.sign('HMAC',K,data));
+}
+async function mnemonicSeed(mnemonic,passphrase='') {
+  const K=await globalThis.crypto.subtle.importKey('raw',bytes(mnemonic.normalize('NFKD')),'PBKDF2',false,['deriveBits']);
+  const out=await globalThis.crypto.subtle.deriveBits({name:'PBKDF2',salt:bytes(('mnemonic'+passphrase).normalize('NFKD')),iterations:2048,hash:'SHA-512'},K,512);
+  return new Uint8Array(out);
+}
+async function masterFromSeed(seed) {
+  const I=await hmac512(bytes('Bitcoin seed'),seed),k=big(I.slice(0,32));
+  if (k===0n || k>=SECP_N) throw new Error('Invalid master key');
+  return {k,c:I.slice(32)};
+}
+async function childPrivate(parent,index) {
+  const hardened=index>=0x80000000;
+  const head=hardened ? concat(Uint8Array.of(0),ser256(parent.k)) : compressedBytes(secpMultiply(parent.k));
+  const I=await hmac512(parent.c,concat(head,ser32(index))),il=big(I.slice(0,32)),k=mod(il+parent.k,SECP_N);
+  // Do not reduce IL modulo n before checking it. BIP-32 skips invalid indices.
+  // The demo reports an explicit failure to avoid silently changing its path.
+  if (il>=SECP_N || k===0n) throw new Error('Invalid BIP-32 child: use the next index');
+  return {k,c:I.slice(32)};
+}
+const DEMO_MNEMONIC='abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
+async function walletDemo(passphrase='',index=0) {
+  const seed=await mnemonicSeed(DEMO_MNEMONIC,passphrase),master=await masterFromSeed(seed);
+  const trace=[{path:'m',key:hex(ser256(master.k)),chain:hex(master.c)}];
+  let node=master,path='m';
+  for (const [i,label] of [[0x8000002c,"44'"],[0x8000003c,"60'"],[0x80000000,"0'"],[0,'0'],[index,String(index)]]) {
+    node=await childPrivate(node,i); path+='/'+label;
+    trace.push({path,key:hex(ser256(node.k)),chain:hex(node.c)});
+  }
+  const Q=secpMultiply(node.k),pub=publicBytes(Q),digest=keccak256(pub),address='0x'+hex(digest.slice(-20));
+  return {mnemonic:DEMO_MNEMONIC,passphrase,index,seed:hex(seed),path,trace,
+    privateKey:hex(ser256(node.k)),publicKey:hex(pub),digest:hex(digest),address,checksummed:checksumAddress(address)};
+}
+function bitSummary(arrays) {
+  let ones=0; const position=Array(arrays[0].length*8).fill(0);
+  for (const a of arrays) for (let i=0;i<a.length;i++) {
+    ones+=bitCount(a[i]); for(let b=0;b<8;b++) position[i*8+b]+=(a[i]>>(7-b))&1;
+  }
+  return {ones,total:arrays.length*arrays[0].length*8,percent:100*ones/(arrays.length*arrays[0].length*8),position};
+}
+async function walletStatistics(progress=()=>{}) {
+  // Fixed public mnemonic, empty passphrase; 256 normal sibling children.
+  const seed=await mnemonicSeed(DEMO_MNEMONIC),master=await masterFromSeed(seed);
+  let parent=master;
+  for (const i of [0x8000002c,0x8000003c,0x80000000,0]) parent=await childPrivate(parent,i);
+  const keys=[],pubs=[],addresses=[],hashes=[],distances=[],hashDistances=[];
+  const hist=Array(16).fill(0),xs=[],ys=[];
+  for (let i=0;i<256;i++) {
+    const child=await childPrivate(parent,i),key=ser256(child.k),pub=publicBytes(secpMultiply(child.k)),digest=keccak256(pub),address=digest.slice(-20);
+    keys.push(key); pubs.push(pub); addresses.push(address); hashes.push(digest);
+    for (const c of hex(address)) hist[parseInt(c,16)]++;
+    // Correlate index with the leading 32-bit word of the numeric key/address.
+    xs.push(Number(child.k>>224n)); ys.push(new DataView(address.buffer,address.byteOffset,4).getUint32(0,false));
+    const message=ser32(i);
+    // Directed perturbation: toggle each of the 32 message bits, never truncate.
+    const baseHash=keccak256(message);
+    for (let bit=0;bit<32;bit++) {
+      const flip=message.slice(); flip[Math.floor(bit/8)]^=1<<(7-bit%8);
+      hashDistances.push(hamming(baseHash,keccak256(flip)));
+    }
+    if (i>0) distances.push(hamming(addresses[i-1],address));
+    if (i%16===15) { progress(i+1); await new Promise(resolve=>setTimeout(resolve,0)); }
+  }
+  const indices=Array.from({length:256},(_,i)=>i);
+  const counts=hist, expected=256*40/16, chiSquare=counts.reduce((sum,c)=>sum+(c-expected)**2/expected,0);
+  return {samples:256,keys:bitSummary(keys),publicKeys:bitSummary(pubs),hashes:bitSummary(hashes),addresses:bitSummary(addresses),
+    hist,expectedNibbleCount:expected,chiSquare,
+    inputKeyCorrelation:pearson(indices,xs),inputAddressCorrelation:pearson(indices,ys),
+    adjacentAddressHamming:distances.reduce((a,b)=>a+b,0)/distances.length,
+    avalanche:{pairs:hashDistances.length,mean:hashDistances.reduce((a,b)=>a+b,0)/hashDistances.length,min:Math.min(...hashDistances),max:Math.max(...hashDistances)},
+    distinctAddresses:new Set(addresses.map(hex)).size};
+}
+async function selfTests() {
+ const checks=[]; const test=(name,ok)=>checks.push({name,ok:Boolean(ok)});
+  test('Keccak-256 empty-string vector',hex(keccak256(bytes('')))==='c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470');
+  test('Keccak-256 abc vector',hex(keccak256(bytes('abc')))==='4e03657aea45a94fc7d47ba826c8d667c0d1e6e33a64a036ec44f58fa12d6c45');
+  test('SHA3-256 empty-string vector (different suffix)',hex(keccak256(bytes(''),0x06))==='a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a');
+  const eipVectors=['0x52908400098527886E0F7030069857D2E4169EE7','0xde709f2102306220921060314715629080e2fb77','0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed','0xfB6916095ca1df60bB79Ce92cE3Ea74c37c5d359'];
+  test('Four published EIP-55 address vectors',eipVectors.every(a=>checksumAddress(a)===a));
+  test('secp256k1: 1G = G',secpMultiply(1n).x===SECP_G.x && secpMultiply(1n).y===SECP_G.y);
+  test('secp256k1: (n-1)G = -G',secpMultiply(SECP_N-1n).x===SECP_G.x && secpMultiply(SECP_N-1n).y===SECP_P-SECP_G.y);
+  test('Public key k = 1 gives known Ethereum address',checksumAddress('0x'+hex(keccak256(publicBytes(SECP_G)).slice(-20)))==='0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf');
+  if (globalThis.crypto?.subtle) {
+    const seed=await mnemonicSeed(DEMO_MNEMONIC,'TREZOR');
+    test('Official BIP-39 TREZOR seed vector',hex(seed)==='c55257c360c07c72029aebc1b53c05ed0362ada38ead3e3e9efa3708e53495531f09a6987599d18264c1e1c92f2cf141630c7a3c4ab7c81b2f001698e7463b04');
+    const master=await masterFromSeed(unhex('000102030405060708090a0b0c0d0e0f'));
+    test('BIP-32 vector 1: master private key',hex(ser256(master.k))==='e8f32e723decf4051aefac8e2c93c9c5b214313817cdb01a1494b917c8436b35');
+    test('BIP-32 vector 1: master chain code',hex(master.c)==='873dff81c02f525623fd1fe5167eac3a55a049de3d314bb42ee227ffed37d508');
+    const demo=await walletDemo();
+    test('Full demo pipeline: known first Ethereum address',demo.checksummed==='0x9858EfFD232B4033E47d90003D41EC34EcaEda94');
+    const entropy=new Uint8Array(16),digest=new Uint8Array(await globalThis.crypto.subtle.digest('SHA-256',entropy));
+    test('Demo BIP-39 checksum: first four SHA-256 bits = 0011',digest[0]>>4===3);
+  }
+  return checks;
+}
+
+const REFERENCE=JSON.parse(document.getElementById('reference-data').textContent);
+const $=id=>document.getElementById(id);
+const esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=(n,d=4)=>n===null?'not defined':Math.abs(n)<1e-12?(0).toFixed(d):n.toFixed(d);
+function svgText(x,y,text,attrs='') {return `<text x="${x}" y="${y}" font-family="system-ui,sans-serif" font-size="12" fill="#536772" ${attrs}>${esc(text)}</text>`;}
+function barChart(id,labels,series,{max=null,line=null,percent=false,height=235}={}) {
+  const w=900,h=height,left=48,right=15,top=22,bottom=40,plotH=h-top-bottom,plotW=w-left-right;
+  const actualMax=max??Math.max(1,...series.flatMap(s=>s.data),line??0)*1.13;
+  let s=`<title>${esc($(id).getAttribute('aria-label')||'Frequency chart')}</title>`;
+  for(let j=0;j<=4;j++) {
+    const v=actualMax*j/4,y=h-bottom-plotH*j/4;
+    s+=`<path d="M${left} ${y}H${w-right}" stroke="#dce4df"/>`+svgText(left-8,y+4,percent?`${v.toFixed(0)}%`:Number.isInteger(v)?v:v.toFixed(1),'text-anchor="end"');
+  }
+  const group=plotW/labels.length,bar=group*.68/series.length;
+  for(let i=0;i<labels.length;i++) {
+    for(let j=0;j<series.length;j++) {
+      const value=series[j].data[i],bh=plotH*value/actualMax,x=left+i*group+group*.16+j*bar,y=h-bottom-bh;
+      s+=`<rect x="${x}" y="${y}" width="${Math.max(1,bar-2)}" height="${bh}" rx="1.5" fill="${series[j].color}"><title>${esc(`${labels[i]} · ${series[j].name}: ${percent?value.toFixed(2)+'%':value}`)}</title></rect>`;
+    }
+    s+=svgText(left+(i+.5)*group,h-bottom+22,labels[i],'text-anchor="middle"');
+  }
+  if(line!==null) {
+    const y=h-bottom-plotH*line/actualMax;
+    s+=`<path d="M${left} ${y}H${w-right}" stroke="#a76a15" stroke-width="1.4" stroke-dasharray="5 4"/>`;
+  }
+  $(id).innerHTML=s;
+}
+function walletMarkup(d) {
+  return `<div class="value-label">Derivation path · BIP-39 passphrase = ${d.passphrase?esc(d.passphrase):'(empty)'}</div><div class="hex">${esc(d.path)}</div>
+  <div class="value-label">BIP-39 seed · 64 bytes</div><div class="hex">${d.seed}</div>
+  <div class="value-label">Leaf private key · 32 bytes · public demonstration data</div><div class="hex">${d.privateKey}</div>
+  <div class="value-label">Public key x || y · 64 bytes · no 04 prefix</div><div class="hex">${d.publicKey}</div>
+  <div class="value-label">Keccak-256(public key) · 32 bytes</div><div class="hex">${d.digest.slice(0,24)}<strong>${d.digest.slice(24)}</strong></div>
+  <div class="value-label">Last 20 bytes as lowercase hexadecimal</div><div class="hex">${d.address}</div>
+  <div class="value-label">EIP-55 checksummed address · same 20 bytes</div><div class="hex address">${d.checksummed}</div>
+  <details><summary>Inspect every BIP-32 node: private scalar and chain code</summary><div class="scroll-table"><table class="wallet-trace"><thead><tr><th>Node</th><th>Private scalar (hex)</th><th>Chain code (hex)</th></tr></thead><tbody>${d.trace.map(n=>`<tr><td>${esc(n.path)}</td><td><code>${n.key}</code></td><td><code>${n.chain}</code></td></tr>`).join('')}</tbody></table></div></details>`;
+}
+let walletBusy=false;
+async function deriveSelectedWallet(reset=false) {
+  if(walletBusy)return;
+  if(reset){$('passphrase-select').value='';$('address-index').value=0;}
+  const index=Number($('address-index').value);
+  if(!Number.isInteger(index)||index<0||index>255||$('address-index').value.trim()===''){$('wallet-status').textContent='Enter an integer address index from 0 to 255.';return;}
+  walletBusy=true;$('derive-button').disabled=true;$('wallet-reset-button').disabled=true;
+  $('wallet-status').textContent='Computing PBKDF2, the HD path, the public key and the checksummed address…';
+  try {
+    const d=await walletDemo($('passphrase-select').value,index);
+    $('wallet-output').innerHTML=walletMarkup(d);
+    $('wallet-status').textContent=`Derived ${d.path} locally. ${!d.passphrase&&index===0?'This matches the saved reference address.':'Changing a seed input or path selects a different key.'}`;
+  } catch(error) {$('wallet-status').textContent='Derivation could not run: '+error.message;}
+  finally {walletBusy=false;$('derive-button').disabled=false;$('wallet-reset-button').disabled=false;}
+}
+function statMarkup(s) {
+  return `<table><thead><tr><th>Measurement</th><th>Observed result</th><th>Comparison / definition</th></tr></thead><tbody>
+  <tr><td>Private-key one bits</td><td>${s.keys.ones.toLocaleString('en-GB')} / ${s.keys.total.toLocaleString('en-GB')} = ${s.keys.percent.toFixed(4)}%</td><td>256 fixed-width 256-bit scalars</td></tr>
+  <tr><td>Public-key one bits</td><td>${s.publicKeys.ones.toLocaleString('en-GB')} / ${s.publicKeys.total.toLocaleString('en-GB')} = ${s.publicKeys.percent.toFixed(4)}%</td><td>256 coordinate pairs, 512 bits each</td></tr>
+  <tr><td>Full digest one bits</td><td>${s.hashes.ones.toLocaleString('en-GB')} / ${s.hashes.total.toLocaleString('en-GB')} = ${s.hashes.percent.toFixed(4)}%</td><td>256 full 256-bit Keccak digests</td></tr>
+  <tr><td>Address one bits</td><td>${s.addresses.ones.toLocaleString('en-GB')} / ${s.addresses.total.toLocaleString('en-GB')} = ${s.addresses.percent.toFixed(4)}%</td><td>256 truncated 160-bit digests</td></tr>
+  <tr><td>Hex-digit count range</td><td>${Math.min(...s.hist)}–${Math.max(...s.hist)}</td><td>Expected count = ${s.expectedNibbleCount} for each of 16 digits</td></tr>
+  <tr><td>χ² for hex-digit counts</td><td>${s.chiSquare.toFixed(5)}</td><td>15 degrees of freedom under the simple uniform model</td></tr>
+  <tr><td>Adjacent address distance</td><td>${s.adjacentAddressHamming.toFixed(4)} / 160 bits</td><td>255 adjacent-index comparisons; idealized mean 80</td></tr>
+  <tr><td>Keccak one-input-bit distance</td><td>${s.avalanche.mean.toFixed(4)} / 256 bits</td><td>${s.avalanche.pairs.toLocaleString('en-GB')} directed trials; idealized mean 128</td></tr>
+  </tbody></table>`;
+}
+function bitBarsMarkup(s) {
+  return [['Private key',s.keys],['Public key',s.publicKeys],['Full digest',s.hashes],['Address',s.addresses]].map(([label,v])=>`<div class="bitline"><b>${label}</b><div class="track" aria-label="${label} one-bit percentage ${v.percent.toFixed(4)}"><i style="width:${v.percent}%"></i></div><span class="number">${v.percent.toFixed(2)}%</span></div>`).join('');
+}
+function renderWalletStats(s) {
+  $('wallet-bit-bars').innerHTML=bitBarsMarkup(s);$('wallet-stat-table').innerHTML=statMarkup(s);
+  barChart('address-histogram','0123456789abcdef'.split(''),[{name:'address hex digits',data:s.hist,color:'#087e83'}],{max:800,line:640});
+}
+async function recomputeStatistics() {
+  const button=$('stats-button');button.disabled=true;
+  $('stats-status').textContent='Computing the fixed dataset…';
+  try {
+    const s=await walletStatistics(n=>{$('stats-status').textContent=`Processed ${n} / 256 sibling keys and ${n*32} one-bit Keccak trials…`;});
+    renderWalletStats(s);
+    const r=REFERENCE.stats,matching=['keys','publicKeys','hashes','addresses'].every(k=>s[k].ones===r[k].ones)&&JSON.stringify(s.hist)===JSON.stringify(r.hist)&&Math.abs(s.avalanche.mean-r.avalanche.mean)<1e-10;
+    $('stats-status').textContent=matching?'Recomputed: results match the saved dataset.':'Recomputed dataset displayed; compare its values with the reference discussion.';
+  } catch(error) {$('stats-status').textContent='Statistics could not run: '+error.message;}
+  finally {button.disabled=false;}
+}
+function checksMarkup(checks) {return checks.map(c=>`<li class="${c.ok?'pass':'fail'}"><strong>${c.ok?'PASS':'FAIL'}</strong> · ${esc(c.name)}</li>`).join('');}
+async function runChecks(){
+ $('check-button').disabled=true;$('checks-status').textContent='Running verification checks…';
+ try{
+  const checks=await selfTests(),failures=checks.filter(c=>!c.ok).length;
+  $('checks-list').innerHTML=checksMarkup(checks);
+  $('checks-status').textContent=(checks.length-failures)+' / '+checks.length+' checks passed.';
+  if(!globalThis.crypto?.subtle)$('checks-status').textContent+=' Five seed/HD checks require Web Crypto and were skipped.';
+ }catch(error){$('checks-status').textContent='Checks could not complete: '+error.message;}
+ finally{$('check-button').disabled=false;}
+}
+$('derive-button').addEventListener('click',()=>deriveSelectedWallet());
+$('wallet-reset-button').addEventListener('click',()=>deriveSelectedWallet(true));
+$('stats-button').addEventListener('click',recomputeStatistics);
+$('check-button').addEventListener('click',runChecks);
+$('print-button').addEventListener('click',()=>window.print());
+renderWalletStats(REFERENCE.stats);
+if(!globalThis.crypto?.subtle) {
+  for(const id of ['derive-button','wallet-reset-button','stats-button'])$(id).disabled=true;
+  $('wallet-status').textContent='Web Crypto is unavailable in this browser context. The verified reference results remain visible; live seed and HD derivation need a browser context that exposes crypto.subtle.';
+  $('stats-status').textContent='Saved results shown. Live recomputation requires Web Crypto.';
+}
+
+</script></body></html>
