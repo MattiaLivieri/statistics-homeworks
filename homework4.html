@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Derivation and implementation of Welford's recurrence formulas and a reproducible experiment on sampling mean and variance.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Homework 4 — Welford’s Recurrences and Sampling Variability — Mattia Livieri</title>
+  <style>:root{--page:#f6f8f7;--paper:#fff;--text:#172b32;--muted:#50656b;--line:#d7e3e0;--teal:#126c67;--pale:#eef6f2;--gold:#a46a20;--navy:#142c38}
+*{box-sizing:border-box}body{margin:0;background:var(--page);color:var(--text);font:16px/1.66 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{max-width:1080px;margin:auto;padding:0 32px}header{padding-top:45px;padding-bottom:24px;border-bottom:2px solid var(--teal)}.eyebrow{margin:0 0 10px;font-size:.8rem;font-weight:720;letter-spacing:.05em;color:var(--teal)}h1,h2,h3{line-height:1.23}h1{font-size:clamp(1.85rem,4.3vw,2.75rem);letter-spacing:-.025em;max-width:900px;margin:0 0 12px}header p:last-child{margin:0;color:var(--muted)}section{margin:30px 0;padding:24px 26px;background:var(--paper);border:1px solid var(--line);border-radius:10px}h2{font-size:1.62rem;margin:0 0 14px}h3{font-size:1.13rem;margin:25px 0 10px}p{margin:11px 0 16px}a{color:var(--teal);text-underline-offset:3px}.equations{margin:15px 0 17px;padding:12px 15px;border:1px solid var(--line);border-radius:5px;background:#f3f7f4;line-height:1.85;overflow-wrap:anywhere}.equations>div+div{margin-top:3px}.equations.emphasis{border-left:4px solid var(--teal);background:var(--pale);font-weight:650}sub,sup{font-size:.76em;line-height:0}code,pre{font-family:ui-monospace,"SFMono-Regular",Consolas,monospace}p code{background:#eef4f0;border-radius:3px;padding:2px 4px;font-size:.88em;overflow-wrap:anywhere}pre{margin:12px 0 16px;background:var(--navy);color:#eaf6f2;padding:15px 17px;border-radius:7px;font-size:.88rem;line-height:1.6;overflow:auto;tab-size:2}.controls{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;padding:15px;background:var(--pale);border:1px solid var(--line);border-radius:7px}label{display:flex;flex-direction:column;gap:5px;font-size:.82rem;font-weight:660}input,button,select{font:inherit;min-width:0}input,select{color:var(--text);background:white;border:1px solid #98b6b2;border-radius:5px;padding:8px 10px;max-width:100%}input{width:154px}button{background:var(--teal);color:#fff;border:1px solid var(--teal);border-radius:5px;padding:9px 15px;font-weight:660;line-height:1.45;cursor:pointer}button:disabled,input:disabled,select:disabled{opacity:.6;cursor:default}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #d5a348;outline-offset:3px}.caption{font-size:.81rem;color:var(--muted);line-height:1.55}.summary{font-weight:640;font-size:.91rem}.table-scroll{overflow-x:auto;max-width:100%}table{width:100%;min-width:620px;border-collapse:collapse;margin:9px 0 14px;font-size:.86rem;font-variant-numeric:tabular-nums;line-height:1.5}th,td{padding:10px 11px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}thead th{background:#e9f2ed;font-weight:680}tbody tr:nth-child(even){background:#f7faf8}.sub{display:block;margin-top:3px;color:var(--muted);font-size:.77rem;font-weight:400;white-space:nowrap}.compare{display:flex;margin:12px 0}.compare select{width:130px}.legend{display:flex;flex-wrap:wrap;gap:10px 17px;margin:11px 0 12px;font-size:.81rem;color:var(--muted)}.legend>span{display:inline-flex;align-items:center;gap:5px}.swatch{display:inline-block;width:16px;height:10px;border-radius:2px}.swatch.small{background:#e6bd84;border:1px solid var(--gold)}.swatch.large{background:#7bbeb0;border:1px solid var(--teal)}.swatch.target{height:0;border-top:2px dashed var(--navy);border-radius:0}.plots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}figure{margin:0;min-width:0}figcaption{font-size:.9rem;font-weight:680;margin-bottom:7px}.chart{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:6px;background:#fdfefd}.chart text{font:12px system-ui,sans-serif;fill:var(--muted)}.chart .grid{stroke:#e1ebe7;fill:none}.chart .axis{stroke:#a7bab6;fill:none}.chart .small-histogram{fill:#e6bd84;fill-opacity:.46;stroke:var(--gold);stroke-width:1.5;stroke-linejoin:round}.chart .large-histogram{fill:#72b9aa;fill-opacity:.61;stroke:var(--teal);stroke-width:1.5;stroke-linejoin:round}.chart .target-line{stroke:var(--navy);stroke-width:1.7;stroke-dasharray:4 3}footer{padding-bottom:26px;color:var(--muted);font-size:.8rem}footer p{margin:8px 0}footer a{overflow-wrap:anywhere}
+@media(max-width:700px){header,main,footer{padding-left:16px;padding-right:16px}header{padding-top:29px}section{padding:18px 14px;margin:21px 0}h2{font-size:1.4rem}.equations{font-size:.93rem;padding:10px 11px}.plots{grid-template-columns:1fr}.controls{padding:12px;gap:10px}.controls label{flex:1;min-width:105px}.controls input{width:100%}.controls button{width:100%}.chart{max-width:500px}table{min-width:590px}th,td{padding:9px 8px}}
+@media print{@page{size:A4;margin:15mm}body{background:white;font-size:10pt}header,main,footer{padding:0;max-width:none}header{padding-bottom:11px}h1{font-size:21pt}h2{font-size:15pt}h3{font-size:11pt;break-after:avoid}section{padding:0;margin:16px 0;border:0}.controls,.compare,#simulation-status{display:none}.equations,pre,figure,tr{break-inside:avoid}table{min-width:0;font-size:8pt}th,td{padding:5px}.sub,.caption,footer{font-size:7.5pt}.plots{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+<header>
+  <p class="eyebrow">Homework 4 · Mattia Livieri</p>
+  <h1>Welford’s Recurrences and Sampling Variability</h1>
+  <p>One-pass statistics and an experiment with penetration scores from 0 to 10.</p>
+</header>
+<main><section id="recurrence" aria-labelledby="recurrence-title">
+  <h2 id="recurrence-title">1. Welford’s recurrence formulas</h2>
+  <p>After observing <i>x</i><sub>1</sub>, …, <i>x</i><sub>n</sub>, let <i>M</i><sub>n</sub> be their mean and <i>SS</i><sub>n</sub> their sum of squared deviations from that mean:</p>
+  <div class="equations">
+    <div><i>M</i><sub>n</sub> = (1/<i>n</i>) ∑<sub>i=1</sub><sup>n</sup> <i>x</i><sub>i</sub></div>
+    <div><i>SS</i><sub>n</sub> = ∑<sub>i=1</sub><sup>n</sup> (<i>x</i><sub>i</sub> − <i>M</i><sub>n</sub>)<sup>2</sup></div>
+  </div>
+
+  <h3>From the mean update to the sum of squares</h3>
+  <p>For <i>n</i> ≥ 2, separate the new observation from the first <i>n</i> − 1. With δ = <i>x</i><sub>n</sub> − <i>M</i><sub>n−1</sub>, Knuth’s mean update is</p>
+  <div class="equations">
+    <div><i>M</i><sub>n</sub> = [(<i>n</i> − 1)<i>M</i><sub>n−1</sub> + <i>x</i><sub>n</sub>]/<i>n</i> = <i>M</i><sub>n−1</sub> + δ/<i>n</i>.</div>
+  </div>
+  <p>Put <i>d</i> = <i>M</i><sub>n</sub> − <i>M</i><sub>n−1</sub> = δ/<i>n</i>. Recenter each of the old deviations at <i>M</i><sub>n</sub> by subtracting <i>d</i>. Expanding the square gives</p>
+  <div class="equations">
+    <div><i>SS</i><sub>n</sub> = ∑<sub>i=1</sub><sup>n−1</sup> [(<i>x</i><sub>i</sub> − <i>M</i><sub>n−1</sub>) − <i>d</i>]<sup>2</sup> + (<i>x</i><sub>n</sub> − <i>M</i><sub>n</sub>)<sup>2</sup></div>
+    <div>= <i>SS</i><sub>n−1</sub> + (<i>n</i> − 1)<i>d</i><sup>2</sup> + (<i>x</i><sub>n</sub> − <i>M</i><sub>n</sub>)<sup>2</sup>.</div>
+  </div>
+  <p>The cross term vanishes because ∑<sub>i=1</sub><sup>n−1</sup> (<i>x</i><sub>i</sub> − <i>M</i><sub>n−1</sub>) = 0. Now <i>x</i><sub>n</sub> − <i>M</i><sub>n</sub> = δ(<i>n</i> − 1)/<i>n</i>. Substituting into the last two terms yields δ<sup>2</sup>(<i>n</i> − 1)/<i>n</i>, so the update is</p>
+  <div class="equations emphasis"><div><i>SS</i><sub>n</sub> = <i>SS</i><sub>n−1</sub> + (<i>x</i><sub>n</sub> − <i>M</i><sub>n−1</sub>)(<i>x</i><sub>n</sub> − <i>M</i><sub>n</sub>).</div></div>
+
+  <h3>Variance recurrences</h3>
+  <p>Since the sample variance is <i>s</i><sub>n</sub><sup>2</sup> = <i>SS</i><sub>n</sub>/(<i>n</i> − 1), substitute <i>SS</i><sub>n−1</sub> = (<i>n</i> − 2)<i>s</i><sub>n−1</sub><sup>2</sup> and divide by <i>n</i> − 1. For the empirical variance <i>v</i><sub>n</sub> = <i>SS</i><sub>n</sub>/<i>n</i>, substitute <i>SS</i><sub>n−1</sub> = (<i>n</i> − 1)<i>v</i><sub>n−1</sub> and divide by <i>n</i> instead.</p>
+  <div class="equations">
+    <div><i>s</i><sub>n</sub><sup>2</sup> = [(<i>n</i> − 2)/(<i>n</i> − 1)]<i>s</i><sub>n−1</sub><sup>2</sup> + δ<sup>2</sup>/<i>n</i>, &nbsp; <i>n</i> ≥ 3.</div>
+    <div><i>v</i><sub>n</sub> = [(<i>n</i> − 1)/<i>n</i>]<i>v</i><sub>n−1</sub> + [(<i>n</i> − 1)/<i>n</i><sup>2</sup>]δ<sup>2</sup>, &nbsp; <i>n</i> ≥ 2.</div>
+  </div>
+  <p>At the first observation, <i>M</i><sub>1</sub> = <i>x</i><sub>1</sub> and <i>SS</i><sub>1</sub> = <i>v</i><sub>1</sub> = 0. The sample variance first exists at <i>n</i> = 2, where <i>s</i><sub>2</sub><sup>2</sup> = (<i>x</i><sub>2</sub> − <i>x</i><sub>1</sub>)<sup>2</sup>/2.</p>
+
+  <h3>JavaScript implementation</h3>
+  <pre><code>function updateWelford(s, x) {
+  const delta = x - s.mean;
+  s.mean += delta / (++s.n);
+  s.ss += delta * (x - s.mean);
+}</code></pre>
+  <p>Initialize the state with <code>{ n: 0, mean: 0, ss: 0 }</code>. The three statements compute the old deviation, update the count and mean, then update <i>SS</i> using the new mean. Read <code>s.ss / (s.n - 1)</code> when <code>s.n &gt;= 2</code>. Each update uses constant memory and requires one pass over the data. For the scores 2, 5, 8, the final mean is 5, <i>SS</i> is 18, and the sample variance is 9.</p>
+</section>
+
+<section id="experiment" aria-labelledby="experiment-title">
+  <h2 id="experiment-title">2. Sampling mean and variance</h2>
+  <h3>Score model and experiment</h3>
+  <p>Each hacker attempts <i>n</i> systems. The score for one attempt, <i>X</i>, is uniform on the eleven integers 0, 1, …, 10: P(<i>X</i> = <i>j</i>) = 1/11 for every <i>j</i> in that range. Attempts are modeled as independent with this same distribution, both within and across hackers.</p>
+  <div class="equations">
+    <div>μ = (1/11) ∑<sub>j=0</sub><sup>10</sup> <i>j</i> = 5.</div>
+    <div>σ<sup>2</sup> = (1/11) ∑<sub>j=0</sub><sup>10</sup> (<i>j</i> − 5)<sup>2</sup> = 10.</div>
+  </div>
+  <p>For hacker <i>h</i>, the program feeds one score at a time into Welford’s update. It records the resulting mean <i>M</i><sub>h,n</sub> and sample variance <i>s</i><sub>h,n</sub><sup>2</sup> at <i>n</i> = 5, 10, 25, 50, 100, 250, 500 and 1,000. The smaller samples are prefixes of the same trajectory. At each size it averages the estimates over the <i>m</i> hackers:</p>
+  <div class="equations">
+    <div><i>A</i><sub>M</sub>(<i>n</i>) = (1/<i>m</i>) ∑<sub>h=1</sub><sup>m</sup> <i>M</i><sub>h,n</sub>, &nbsp; <i>A</i><sub>V</sub>(<i>n</i>) = (1/<i>m</i>) ∑<sub>h=1</sub><sup>m</sup> <i>s</i><sub>h,n</sub><sup>2</sup>.</div>
+  </div>
+  <p>To measure how much the individual estimates differ, it also computes their standard deviations across hackers, using denominator <i>m</i> − 1. The default run uses 5,000 hackers and a fixed seed so the experiment can be reproduced.</p>
+
+  <h3>What theory predicts</h3>
+  <p>The sample mean has E[<i>M</i><sub>n</sub>] = μ and Var(<i>M</i><sub>n</sub>) = σ<sup>2</sup>/<i>n</i>. To see why the sample variance also has the correct expected value, write</p>
+  <div class="equations">
+    <div><i>SS</i><sub>n</sub> = ∑<sub>i=1</sub><sup>n</sup> (<i>X</i><sub>i</sub> − μ)<sup>2</sup> − <i>n</i>(<i>M</i><sub>n</sub> − μ)<sup>2</sup>,</div>
+    <div>E[<i>SS</i><sub>n</sub>] = <i>n</i>σ<sup>2</sup> − <i>n</i>(σ<sup>2</sup>/<i>n</i>) = (<i>n</i> − 1)σ<sup>2</sup>.</div>
+  </div>
+  <p>Thus E[<i>s</i><sub>n</sub><sup>2</sup>] = σ<sup>2</sup> when we divide by <i>n</i> − 1. Both across-hacker averages are therefore centered on their respective targets, for every tested <i>n</i>.</p>
+  <p>The fourth central moment of the scores is μ<sub>4</sub> = (1/11)∑<sub>j=0</sub><sup>10</sup>(<i>j</i> − 5)<sup>4</sup> = 178. The sampling variance of <i>s</i><sub>n</sub><sup>2</sup> gives a second measure of estimator precision:</p>
+  <div class="equations">
+    <div>Var(<i>M</i><sub>n</sub>) = 10/<i>n</i>.</div>
+    <div>Var(<i>s</i><sub>n</sub><sup>2</sup>) = [μ<sub>4</sub> − ((<i>n</i> − 3)/(<i>n</i> − 1))σ<sup>4</sup>]/<i>n</i> = [78 + 200/(<i>n</i> − 1)]/<i>n</i>.</div>
+  </div>
+  <p>The theoretical standard deviations in the table are the square roots of these two quantities. The first describes the spread of the sample means; the second describes the spread of the sample variance estimates.</p>
+
+  <h3 id="results-title">Simulation results</h3>
+  <form class="controls" id="simulation-form" aria-labelledby="results-title">
+    <label><span>Hackers <i>m</i></span><input id="hackers" type="number" min="2" max="10000" step="1" value="5000" required></label>
+    <label>Simulation seed<input id="seed" type="number" min="0" max="4294967295" step="1" value="20261105" required></label>
+    <button type="submit" id="run">Run simulation</button>
+  </form>
+  <p id="simulation-status" class="caption" role="status" aria-live="polite">The saved run is displayed below.</p>
+  <p id="run-summary" class="summary">Displayed run: 5,000 hackers · 5,000,000 generated scores · seed 20261105.</p>
+  <div class="table-scroll">
+    <table aria-label="Average estimates and their variability across hackers">
+      <thead><tr>
+        <th scope="col">Systems <i>n</i></th>
+        <th scope="col">Average sample mean<span class="sub">Target: 5</span></th>
+        <th scope="col">Average sample variance<span class="sub">Target: 10</span></th>
+        <th scope="col">SD of sample means<span class="sub">Across hackers</span></th>
+        <th scope="col">SD of sample variances<span class="sub">Across hackers</span></th>
+      </tr></thead>
+      <tbody id="results-body"><tr><th scope="row">5</th><td>4.9960</td><td>10.0150</td><td>1.4298<span class="sub">Theory: 1.4142</span></td><td>5.0513<span class="sub">Theory: 5.0596</span></td></tr><tr><th scope="row">10</th><td>5.0082</td><td>9.9904</td><td>1.0041<span class="sub">Theory: 1.0000</span></td><td>3.1670<span class="sub">Theory: 3.1658</span></td></tr><tr><th scope="row">25</th><td>5.0058</td><td>10.0278</td><td>0.6318<span class="sub">Theory: 0.6325</span></td><td>1.8642<span class="sub">Theory: 1.8583</span></td></tr><tr><th scope="row">50</th><td>5.0028</td><td>10.0079</td><td>0.4435<span class="sub">Theory: 0.4472</span></td><td>1.2867<span class="sub">Theory: 1.2813</span></td></tr><tr><th scope="row">100</th><td>5.0005</td><td>9.9987</td><td>0.3153<span class="sub">Theory: 0.3162</span></td><td>0.9063<span class="sub">Theory: 0.8945</span></td></tr><tr><th scope="row">250</th><td>4.9999</td><td>9.9977</td><td>0.1994<span class="sub">Theory: 0.2000</span></td><td>0.5535<span class="sub">Theory: 0.5614</span></td></tr><tr><th scope="row">500</th><td>4.9990</td><td>10.0002</td><td>0.1410<span class="sub">Theory: 0.1414</span></td><td>0.3898<span class="sub">Theory: 0.3960</span></td></tr><tr><th scope="row">1,000</th><td>4.9997</td><td>9.9975</td><td>0.1010<span class="sub">Theory: 0.1000</span></td><td>0.2749<span class="sub">Theory: 0.2796</span></td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="plot-section">
+    <h3>Compare the sampling distributions</h3>
+    <div class="compare"><label><span>Compare <i>n</i> = 5 with</span><select id="compare-size"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option><option value="250">250</option><option value="500">500</option><option value="1000" selected>1,000</option></select></label></div>
+    <p class="caption">Each plot uses the same bins and axes for both sample sizes. Heights are percentages of hackers in a bin.</p>
+    <div class="legend"><span><b class="swatch small"></b><i>n</i> = 5</span><span><b class="swatch large"></b><span id="legend-size"><i>n</i> = 1,000</span></span><span><b class="swatch target"></b>Theoretical target</span></div>
+    <div class="plots">
+      <figure><figcaption>Sample means</figcaption><svg id="mean-plot" class="chart" viewBox="0 0 460 250" role="img" aria-label="Distribution of sample means across hackers"></svg></figure>
+      <figure><figcaption>Sample variances</figcaption><svg id="variance-plot" class="chart" viewBox="0 0 460 250" role="img" aria-label="Distribution of sample variances across hackers"></svg></figure>
+    </div>
+    <noscript><p class="caption">JavaScript is needed to rerun the simulation and draw the plots. The saved results and discussion remain readable.</p></noscript>
+  </div>
+
+  <h3>Conclusions and relevance to inference</h3>
+  <p id="observations">In the displayed run, the average sample mean is 4.9960 at n = 5 and 4.9997 at n = 1,000 (target: 5). The corresponding average sample variances are 10.0150 and 9.9975 (target: 10). Across the same sizes, the standard deviation of the sample means changes from 1.4298 to 0.1010, and that of the sample variances changes from 5.0513 to 0.2749.</p>
+  <p>Increasing <i>n</i> makes the individual estimates more precise. Their sampling variances are of order 1/<i>n</i>, so their standard deviations are of order 1/√<i>n</i>. The population variance stays at 10 while the estimates of it become less dispersed. Unbiasedness and vanishing sampling variance together give consistency. Individual estimates and finite simulation averages can still fluctuate between adjacent sample sizes.</p>
+  <p>In real data, μ and σ<sup>2</sup> are usually unknown. Unbiasedness tells us that repeated samples target the right values; sampling variability tells us how precise one estimate is. Those two properties help choose a sample size and quantify uncertainty, for example with standard errors. Increasing <i>m</i> makes the simulation averages more stable, since averaging independent estimates divides their variance by <i>m</i>. It does not make one hacker’s estimate more precise at fixed <i>n</i>.</p>
+</section>
+</main>
+<footer>
+  <p>References: B. P. Welford, <a href="https://doi.org/10.1080/00401706.1962.10490022">Note on a Method for Calculating Corrected Sums of Squares and Products</a> (1962); <a href="https://www.randomservices.org/random/sample/Variance.html">The Sample Variance</a> (sampling variance formula).</p>
+  <p>The simulation uses a seeded Mulberry32 generator and rejects the four excess 32-bit values before reducing modulo 11. All code and saved numerical results are embedded in this file.</p>
+</footer>
+<script type="application/json" id="reference-data">{"m":5000,"seed":20261105,"rows":[{"n":5,"averageMean":4.9960400000000025,"averageVariance":10.01498000000001,"meanSD":1.429786409305687,"varianceSD":5.051257728578905,"meanCounts":[0,0,2,3,1,5,3,8,17,24,33,48,56,67,94,103,141,163,168,217,217,226,250,261,270,255,255,294,255,243,199,192,169,150,130,107,88,96,42,50,36,20,15,10,8,3,2,4,0,0],"varianceCounts":[10,39,66,67,85,104,83,151,137,133,156,163,134,211,164,146,170,201,182,181,177,180,197,172,124,203,132,118,138,102,116,109,89,93,77,56,53,59,28,41,23,25,24,12,12,7,7,11,4,5,3,11,1,1,2,0,4,0,0,0,1,0,0,0]},{"n":10,"averageMean":5.008240000000008,"averageVariance":9.99038666666669,"meanSD":1.0040646052651743,"varianceSD":3.1670388523543878,"meanCounts":[0,0,0,0,0,0,0,0,2,2,4,6,17,24,44,57,91,114,161,211,251,313,342,373,374,409,363,345,353,287,212,187,131,104,78,59,35,27,13,7,1,2,1,0,0,0,0,0,0,0],"varianceCounts":[0,0,1,3,8,15,28,38,77,90,105,140,183,222,227,239,308,318,293,282,314,292,227,260,256,188,161,159,146,104,81,64,55,41,18,25,12,7,3,4,2,1,2,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"n":25,"averageMean":5.005831999999997,"averageVariance":10.02776533333334,"meanSD":0.6317903921364424,"varianceSD":1.8642276040283408,"meanCounts":[0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,3,11,31,81,116,228,354,446,541,631,572,620,473,326,234,160,95,42,24,5,1,2,0,0,0,0,0,0,0,0,0,0,0,0,0],"varianceCounts":[0,0,0,0,0,0,0,0,0,7,15,28,73,123,187,251,339,454,497,558,515,463,394,351,265,187,120,69,52,27,15,4,4,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"n":50,"averageMean":5.0028120000000165,"averageVariance":10.007851020408205,"meanSD":0.4434923108036355,"varianceSD":1.2866845997055616,"meanCounts":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,2,13,41,101,248,470,693,910,859,706,482,284,121,54,12,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"varianceCounts":[0,0,0,0,0,0,0,0,0,0,1,3,12,21,64,178,329,495,660,756,746,624,474,313,185,95,24,11,6,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"n":100,"averageMean":5.000519999999985,"averageVariance":9.998745454545428,"meanSD":0.3152675186594149,"varianceSD":0.9062571574999266,"meanCounts":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,20,103,357,816,1179,1195,788,386,118,27,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"varianceCounts":[0,0,0,0,0,0,0,0,0,0,0,0,0,1,11,44,169,437,814,1057,1051,732,412,200,50,17,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"n":250,"averageMean":4.999885600000003,"averageVariance":9.997698567068273,"meanSD":0.19938747499699452,"varianceSD":0.5534634545993766,"meanCounts":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,103,658,1711,1738,662,110,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"varianceCounts":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,13,153,748,1609,1576,709,168,20,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"n":500,"averageMean":4.999038400000002,"averageVariance":10.000190582765548,"meanSD":0.14096825222392112,"varianceSD":0.38984511407201095,"meanCounts":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,358,2186,2065,369,14,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"varianceCounts":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,21,463,2035,1956,494,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"n":1000,"averageMean":4.999700800000003,"averageVariance":9.997498267467433,"meanSD":0.10100882058378462,"varianceSD":0.2749420154312212,"meanCounts":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,116,2399,2360,124,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"varianceCounts":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,159,2401,2258,181,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}]}</script>
+<script>'use strict';
+
+const WELFORD = (() => {
+  const sizes = Object.freeze([5, 10, 25, 50, 100, 250, 500, 1000]);
+  const population = Object.freeze({ mean: 5, variance: 10, fourthMoment: 178 });
+  const bins = Object.freeze({ mean: { width: 0.2, count: 50 }, variance: { width: 0.5, count: 64 } });
+  const empty = () => ({ n: 0, mean: 0, ss: 0 });
+
+  function updateWelford(s, x) {
+    const delta = x - s.mean;
+    s.mean += delta / (++s.n);
+    s.ss += delta * (x - s.mean);
+  }
+
+  const sampleVariance = s => s.n < 2 ? null : s.ss / (s.n - 1);
+
+  function theory(n) {
+    const meanVariance = population.variance / n;
+    const varianceVariance = (population.fourthMoment - (n - 3) / (n - 1) * population.variance ** 2) / n;
+    return { meanSD: Math.sqrt(meanVariance), varianceSD: Math.sqrt(varianceVariance) };
+  }
+
+  function randomUint32(seed) {
+    let state = seed >>> 0;
+    return () => {
+      state = (state + 0x6D2B79F5) >>> 0;
+      let z = Math.imul(state ^ (state >>> 15), state | 1);
+      z ^= z + Math.imul(z ^ (z >>> 7), z | 61);
+      return (z ^ (z >>> 14)) >>> 0;
+    };
+  }
+
+  function drawScore(random) {
+    // Keep a multiple of 11 equally sized sets of 32-bit outputs.
+    let u;
+    do { u = random(); } while (u >= 4294967292);
+    return u % 11;
+  }
+
+  function recordBin(counts, x, width) {
+    // Account for floating-point rounding at exact bin boundaries.
+    const i = Math.min(counts.length - 1, Math.max(0, Math.floor(x / width + 1e-9)));
+    counts[i]++;
+  }
+
+  function validate({ m, seed }) {
+    if (!Number.isInteger(m) || m < 2 || m > 10000) throw Error('Enter an integer from 2 to 10,000 for m.');
+    if (!Number.isInteger(seed) || seed < 0 || seed > 4294967295) throw Error('Enter an integer seed from 0 to 4,294,967,295.');
+  }
+
+  async function simulate(config, progress = () => {}, pause = true) {
+    validate(config);
+    const { m, seed } = config;
+    const random = randomUint32(seed);
+    const summaries = sizes.map(n => ({
+      n, means: empty(), variances: empty(),
+      meanCounts: Array(bins.mean.count).fill(0),
+      varianceCounts: Array(bins.variance.count).fill(0),
+    }));
+    for (let h = 0; h < m; h++) {
+      const hacker = empty();
+      let checkpoint = 0;
+      for (let k = 1; k <= sizes[sizes.length - 1]; k++) {
+        updateWelford(hacker, drawScore(random));
+        if (k === sizes[checkpoint]) {
+          const row = summaries[checkpoint++];
+          const variance = sampleVariance(hacker);
+          updateWelford(row.means, hacker.mean);
+          updateWelford(row.variances, variance);
+          recordBin(row.meanCounts, hacker.mean, bins.mean.width);
+          recordBin(row.varianceCounts, variance, bins.variance.width);
+        }
+      }
+      if ((h + 1) % 250 === 0 || h + 1 === m) {
+        progress(h + 1, m);
+        if (pause) await new Promise(resolve => setTimeout(resolve, 0));
+      }
+    }
+    return { m, seed, rows: summaries.map(row => ({
+      n: row.n,
+      averageMean: row.means.mean,
+      averageVariance: row.variances.mean,
+      meanSD: Math.sqrt(sampleVariance(row.means)),
+      varianceSD: Math.sqrt(sampleVariance(row.variances)),
+      meanCounts: row.meanCounts,
+      varianceCounts: row.varianceCounts,
+    })) };
+  }
+
+  return { sizes, population, bins, empty, updateWelford, sampleVariance, theory, validate, simulate };
+})();
+
+if (typeof module !== 'undefined' && module.exports) module.exports = WELFORD;
+
+const DISPLAY = (() => {
+  const integer = n => n.toLocaleString('en-US');
+  const f = n => n.toFixed(4);
+
+  function rows(run, theory) {
+    return run.rows.map(r => {
+      const expected = theory(r.n);
+      return `<tr><th scope="row">${integer(r.n)}</th><td>${f(r.averageMean)}</td><td>${f(r.averageVariance)}</td><td>${f(r.meanSD)}<span class="sub">Theory: ${f(expected.meanSD)}</span></td><td>${f(r.varianceSD)}<span class="sub">Theory: ${f(expected.varianceSD)}</span></td></tr>`;
+    }).join('');
+  }
+
+  function summary(run) {
+    return `Displayed run: ${integer(run.m)} hackers · ${integer(run.m * run.rows.at(-1).n)} generated scores · seed ${run.seed}.`;
+  }
+
+  function observations(run) {
+    const first = run.rows[0], last = run.rows.at(-1);
+    return `In the displayed run, the average sample mean is ${f(first.averageMean)} at n = ${first.n} and ${f(last.averageMean)} at n = ${integer(last.n)} (target: 5). The corresponding average sample variances are ${f(first.averageVariance)} and ${f(last.averageVariance)} (target: 10). Across the same sizes, the standard deviation of the sample means changes from ${f(first.meanSD)} to ${f(last.meanSD)}, and that of the sample variances changes from ${f(first.varianceSD)} to ${f(last.varianceSD)}.`;
+  }
+
+  return { integer, rows, summary, observations };
+})();
+
+if (typeof module !== 'undefined' && module.exports) module.exports = DISPLAY;
+
+const get = id => document.getElementById(id);
+let current = JSON.parse(get('reference-data').textContent);
+
+function histogram(id, key, title, unit, target, first, second) {
+  const bin = WELFORD.bins[key];
+  const counts = key === 'mean' ? 'meanCounts' : 'varianceCounts';
+  const a = first[counts].map(c => c / current.m), b = second[counts].map(c => c / current.m);
+  const peak = Math.max(...a, ...b);
+  const step = peak <= .08 ? .02 : peak <= .20 ? .05 : peak <= .40 ? .10 : peak <= .80 ? .20 : .25;
+  const W = 460, H = 250, L = 53, R = 16, T = 23, B = 46;
+  const hi = bin.width * bin.count, top = step * 4;
+  const x = v => L + v / hi * (W - L - R), y = v => H - B - v / top * (H - T - B);
+  const baseline = y(0), precision = v => v.toFixed(2);
+  let svg = `<title>${title}: n = ${first.n} and n = ${second.n}</title><desc>Empirical percentages of hackers in equal width bins. The dashed line shows the theoretical target ${target}.</desc>`;
+  for (let i = 0; i <= 4; i++) {
+    const v = i * step, yy = precision(y(v));
+    svg += `<path class="grid" d="M${L} ${yy}H${W-R}"/><text x="${L-8}" y="${Number(yy)+4}" text-anchor="end">${Math.round(100*v)}%</text>`;
+  }
+  svg += `<path class="axis" d="M${L} ${T}V${baseline}H${W-R}"/><text x="${L}" y="15">Share of hackers</text>`;
+  const ticks = key === 'mean' ? [0, 2, 4, 6, 8, 10] : [0, 5, 10, 15, 20, 25, 30];
+  for (const t of ticks) svg += `<text x="${x(t)}" y="${baseline+21}" text-anchor="middle">${t}</text>`;
+  svg += `<text x="${(L+W-R)/2}" y="${H-6}" text-anchor="middle">${unit}</text>`;
+  function outline(proportions, className) {
+    let d = `M${L} ${baseline}`;
+    proportions.forEach((p, i) => { d += `V${precision(y(p))}H${precision(x((i+1)*bin.width))}`; });
+    return `<path class="${className}" d="${d}V${baseline}Z"/>`;
+  }
+  svg += outline(a, 'small-histogram') + outline(b, 'large-histogram');
+  svg += `<path class="target-line" d="M${x(target)} ${T}V${baseline}"/>`;
+  get(id).innerHTML = svg;
+}
+
+function drawPlots() {
+  const first = current.rows[0], second = current.rows.find(r => r.n === Number(get('compare-size').value));
+  get('legend-size').textContent = `n = ${DISPLAY.integer(second.n)}`;
+  histogram('mean-plot', 'mean', 'Sample means', 'Sample mean (score)', WELFORD.population.mean, first, second);
+  histogram('variance-plot', 'variance', 'Sample variances', 'Sample variance (score²)', WELFORD.population.variance, first, second);
+}
+
+function displayRun() {
+  get('results-body').innerHTML = DISPLAY.rows(current, WELFORD.theory);
+  get('run-summary').textContent = DISPLAY.summary(current);
+  get('observations').textContent = DISPLAY.observations(current);
+  drawPlots();
+}
+
+get('compare-size').addEventListener('change', drawPlots);
+get('simulation-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  if (get('run').disabled) return;
+  const config = { m: get('hackers').valueAsNumber, seed: get('seed').valueAsNumber };
+  const inputs = ['hackers', 'seed', 'run', 'compare-size'];
+  try {
+    WELFORD.validate(config);
+    for (const id of inputs) get(id).disabled = true;
+    get('simulation-status').textContent = 'Running simulation…';
+    current = await WELFORD.simulate(config, (done, total) => {
+      get('simulation-status').textContent = `Simulated ${DISPLAY.integer(done)} of ${DISPLAY.integer(total)} hackers…`;
+    });
+    displayRun();
+    get('simulation-status').textContent = 'Simulation complete. The table and plots show the new run.';
+  } catch (error) {
+    get('simulation-status').textContent = error.message;
+  } finally {
+    for (const id of inputs) get(id).disabled = false;
+  }
+});
+drawPlots();
+</script>
+</body>
+</html>
