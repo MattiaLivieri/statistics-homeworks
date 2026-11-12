@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Numerical Riemann and Lebesgue integration, and an accurate numerical standard normal CDF.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Homework 5 — Numerical Integration and the Normal CDF — Mattia Livieri</title>
+  <style>:root{--page:#f5f8f7;--paper:#fff;--text:#1a3038;--muted:#51666d;--line:#d8e4e1;--accent:#126c67;--soft:#edf6f2;--code:#152d39}
+*{box-sizing:border-box}body{margin:0;background:var(--page);color:var(--text);font:16px/1.65 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main{max-width:1150px;margin:auto;padding:0 30px}header{padding-top:42px;padding-bottom:23px;border-bottom:2px solid var(--accent)}.eyebrow{margin:0 0 10px;color:var(--accent);font-size:.82rem;font-weight:730;letter-spacing:.04em}header p:last-child{margin:0;color:var(--muted)}h1,h2,h3{line-height:1.25}h1{margin:0 0 12px;font-size:clamp(1.8rem,4vw,2.7rem);letter-spacing:-.025em}h2{margin:0 0 17px;font-size:1.65rem;letter-spacing:-.015em}h3{margin:28px 0 10px;font-size:1.13rem}section{margin:27px 0;padding:25px 26px;border:1px solid var(--line);border-radius:10px;background:var(--paper)}p{margin:10px 0 16px}a{color:var(--accent);text-underline-offset:3px;overflow-wrap:anywhere}.equations{background:#f2f7f4;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:5px;margin:15px 0 16px;padding:11px 14px;line-height:1.8;overflow-wrap:anywhere}sub,sup{font-size:.75em;line-height:0}.table-scroll{max-width:100%;overflow-x:auto;margin:14px 0 17px}table{border-collapse:collapse;width:100%;min-width:625px;font-size:.84rem;line-height:1.47;font-variant-numeric:tabular-nums}table.compact-table{max-width:560px;min-width:290px}table.methods-table{min-width:560px}th,td{border-bottom:1px solid var(--line);text-align:left;padding:10px 11px;vertical-align:top}thead th{background:#e9f2ed;font-weight:680}tbody th{font-weight:650}tbody tr:nth-child(even){background:#f7faf8}caption{text-align:left;font-weight:680;color:var(--text);margin:0 0 7px}.muted,.caption{color:var(--muted)}.caption{font-size:.81rem;line-height:1.55}.control{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap;padding:13px 15px;margin:14px 0;background:var(--soft);border:1px solid var(--line);border-radius:6px}label{font-size:.86rem;font-weight:650}input,select,button{font:inherit;max-width:100%;min-width:0}input,select{border:1px solid #9bb6b4;border-radius:5px;padding:7px 9px;background:#fff;color:var(--text);font-size:.87rem}input{width:140px}button{border:1px solid var(--accent);border-radius:5px;padding:7px 13px;background:var(--accent);color:#fff;font-weight:650;font-size:.87rem;cursor:pointer}:focus-visible{outline:3px solid #d09b40;outline-offset:3px}.result{font-variant-numeric:tabular-nums;overflow-wrap:anywhere;font-weight:650}pre,code{font-family:ui-monospace,"SFMono-Regular",Consolas,monospace}p code{font-size:.9em;padding:2px 4px;border-radius:3px;background:#eef4f1;overflow-wrap:anywhere}details{margin:16px 0 4px;border:1px solid var(--line);border-radius:6px;padding:10px 13px;background:#f8faf9}summary{font-weight:650;font-size:.86rem;cursor:pointer}pre{margin:10px 0 0;overflow:auto;max-height:380px;padding:13px 14px;border-radius:5px;background:var(--code);color:#edf7f4;font-size:.79rem;line-height:1.56}
+@media(max-width:700px){header,main{padding-left:15px;padding-right:15px}header{padding-top:28px}section{padding:18px 14px;margin:20px 0}h2{font-size:1.4rem}.equations{font-size:.94rem;padding:9px 11px}th,td{padding:8px 9px}.control{align-items:flex-start}.control label{flex-basis:100%}select{width:100%}}
+@media print{@page{size:A4;margin:15mm}body{background:#fff;font-size:9.5pt}header,main{max-width:none;padding:0}header{padding-bottom:10px}h1{font-size:22pt}h2{font-size:15pt}h3{font-size:11pt;break-after:avoid}section{padding:0;border:0;margin:14px 0}.control,details,.result{display:none}.equations,tr{break-inside:avoid}table,table.methods-table,table.compact-table{min-width:0;font-size:7.5pt}th,td{padding:4px}.caption{font-size:7.5pt}.table-scroll{overflow:visible}}
+</style>
+</head>
+<body>
+  <header>
+    <p class="eyebrow">Homework 5 · Mattia Livieri</p>
+    <h1>Numerical Integration and the Normal CDF</h1>
+    <p>Domain and range partitions, followed by a stable computation of normal probabilities.</p>
+  </header>
+  <main><section id="integration" aria-labelledby="integration-title">
+  <h2 id="integration-title">1. Riemann and Lebesgue integration</h2>
+  <h3>Domain and range partitions</h3>
+  <p>The domain method divides [<i>a</i>, <i>b</i>] into <i>N</i> equal subintervals and evaluates <i>f</i> at each midpoint:</p>
+  <div class="equations"><i>h</i> = (<i>b</i> − <i>a</i>)/<i>N</i>, &nbsp; <i>R</i><sub>N</sub> = <i>h</i> ∑<sub>i=0</sub><sup>N−1</sup> <i>f</i>(<i>a</i> + (<i>i</i> + ½)<i>h</i>).</div>
+  <p>The range method divides the values into bins <i>B</i><sub>j</sub> = [<i>y</i><sub>j</sub>, <i>y</i><sub>j+1</sub>), including the maximum in the last bin. For each bin, it finds the Lebesgue measure λ(<i>E</i><sub>j</sub>) of its preimage <i>E</i><sub>j</sub> = {<i>x</i> : <i>f</i>(<i>x</i>) ∈ <i>B</i><sub>j</sub>}. Replacing <i>f</i> on that set by the bin midpoint gives the integral of a simple function:</p>
+  <div class="equations"><i>L</i><sub>K</sub> = ∑<sub>j=0</sub><sup>K−1</sup> [(<i>y</i><sub>j</sub> + <i>y</i><sub>j+1</sub>)/2] λ(<i>E</i><sub>j</sub>).</div>
+  <p>For bounded measurable <i>f</i> and bins of width Δ<i>y</i>, the pointwise error is at most Δ<i>y</i>/2, so |<i>L</i><sub>K</sub> − ∫ <i>f</i>| ≤ (<i>b</i> − <i>a</i>)Δ<i>y</i>/2. The implementation obtains the measures from the formulas below, rather than counting sample points inside bins. When a value occurs on a set of positive measure, we can use that value as an exact singleton bin.</p>
+
+  <div class="table-scroll" tabindex="0" role="region" aria-label="Functions and preimage measures">
+    <table class="methods-table">
+      <thead><tr><th scope="col">Function and domain</th><th scope="col">Exact integral</th><th scope="col">Measure used in the range method</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">sin(<i>x</i>), [0, π]</th><td>2</td><td>On [0, 1], the length below <i>y</i> is 2 arcsin(<i>y</i>). Subtract the two boundary lengths to obtain a bin measure.</td></tr>
+        <tr><th scope="row"><i>x</i><sup>2</sup>, [0, 1]</th><td>1/3</td><td>The length below <i>y</i> is √<i>y</i> for 0 ≤ <i>y</i> ≤ 1.</td></tr>
+        <tr><th scope="row">1 for <i>x</i> &lt; ½; 3 otherwise, [0, 1]</th><td>2</td><td>The levels {1} and {3} each have a preimage of length ½.</td></tr>
+        <tr><th scope="row">|<i>x</i> − ½|, [0, 1]</th><td>1/4</td><td>The length below <i>y</i> is 2<i>y</i> for 0 ≤ <i>y</i> ≤ ½.</td></tr>
+        <tr><th scope="row">1/√<i>x</i>, (0, 1]</th><td>2</td><td>For <i>y</i> ≥ 1, λ{<i>f</i> ≥ <i>y</i>} = 1/<i>y</i><sup>2</sup>. Subtract the two tail lengths to obtain a bin measure.</td></tr>
+        <tr><th scope="row">Dirichlet, [0, 1]</th><td>0 (Lebesgue)</td><td><i>f</i> = 1 on rationals and 0 on irrationals. The measures at levels 1 and 0 are 0 and 1.</td></tr>
+        <tr><th scope="row">Thomae, [0, 1]</th><td>0</td><td><i>f</i>(<i>p</i>/<i>q</i>) = 1/<i>q</i> in lowest terms and <i>f</i> = 0 on irrationals. All positive levels together have measure 0.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>An unbounded function and two exceptional cases</h3>
+  <p><strong>Unbounded integrand.</strong> The value 2 for 1/√<i>x</i> is both its improper Riemann integral and its Lebesgue integral; the function is not bounded, so the proper Riemann integral does not apply. The domain rule uses interior midpoints. In the range rule we cap the function at <i>T</i> = 1 + √<i>K</i>, use <i>K</i> bins on [1, <i>T</i>), and add the cap atom <i>T</i> · <i>T</i><sup>−2</sup> exactly. The cap removes ∫<sub>0</sub><sup>1/T²</sup>(<i>x</i><sup>−1/2</sup> − <i>T</i>) d<i>x</i> = 1/<i>T</i>. Together with the bin error, this gives a total bound of 1/<i>T</i> + (<i>T</i> − 1)/(2<i>K</i>), which tends to zero.</p>
+  <p><strong>Dirichlet.</strong> Every nonempty subinterval has rational and irrational points, so the lower and upper Darboux sums are 0 and 1. The uniform midpoint tags (2<i>i</i> + 1)/(2<i>N</i>) are rational and give 1 for every <i>N</i>. Tags (<i>i</i> + √2/2)/<i>N</i> are irrational and give 0 instead. There is no Riemann integral. The Lebesgue integral is 0 because the rationals form a countable set of measure zero.</p>
+  <p><strong>Thomae.</strong> At an irrational point the function is continuous: for every ε &gt; 0, only finitely many fractions in [0, 1] have reduced denominator small enough to give <i>f</i> ≥ ε. Discontinuities occur only at rationals, so Thomae is Riemann integrable by the Lebesgue criterion. Both integrals are 0. To evaluate its midpoints, the program uses the exact numerator and denominator and reduces the fraction with a greatest common divisor. Testing whether a floating-point number is rational would not distinguish the mathematical tags.</p>
+
+  <h3>Accuracy and convergence</h3>
+  <p>The experiments use <i>N</i> = <i>K</i> ∈ {15, 63, 255, 1,023, 4,095}. The odd sizes place the jump or cusp inside a subinterval. Atomic range partitions use their exact levels at every size.</p>
+  <div class="table-scroll" tabindex="0" role="region" aria-label="Integration results at 4095 intervals or bins">
+    <table><caption>Results at <i>N</i> = <i>K</i> = 4,095</caption>
+      <thead><tr><th scope="col">Function</th><th scope="col">Reference</th><th scope="col">Domain estimate</th><th scope="col">Absolute difference</th><th scope="col">Range estimate</th><th scope="col">Absolute difference</th></tr></thead>
+      <tbody><tr><th scope="row">sin(x) <span class="muted">[0, π]</span></th><td>2</td><td>2.000000049047</td><td>4.905e-8</td><td>1.999997766104</td><td>2.234e-6</td></tr><tr><th scope="row">x² <span class="muted">[0, 1]</span></th><td>1/3</td><td>0.3333333283639</td><td>4.969e-9</td><td>0.3333341241621</td><td>7.908e-7</td></tr><tr><th scope="row">Step: 1 or 3 <span class="muted">[0, 1]</span></th><td>2</td><td>2.000244200244</td><td>2.442e-4</td><td>2.000000000000</td><td>0</td></tr><tr><th scope="row">|x − ½| <span class="muted">[0, 1]</span></th><td>1/4</td><td>0.2499999850916</td><td>1.491e-8</td><td>0.2500000000000</td><td>0</td></tr><tr><th scope="row">1/√x <span class="muted">(0, 1]</span></th><td>2</td><td>1.990547305975</td><td>9.453e-3</td><td>1.984654233073</td><td>1.535e-2</td></tr><tr><th scope="row">Dirichlet <span class="muted">[0, 1]</span></th><td>0</td><td>1</td><td>1.000e+0</td><td>0</td><td>0</td></tr><tr><th scope="row">Thomae <span class="muted">[0, 1]</span></th><td>0</td><td>0.001831501831502</td><td>1.832e-3</td><td>0</td><td>0</td></tr></tbody>
+    </table>
+  </div>
+  <p class="caption">Differences are measured against the exact values above. For Dirichlet, the domain column is a tagged sum compared with the Lebesgue value, since no Riemann value exists.</p>
+  <div class="control"><label for="function-choice">Function for the refinement comparison</label><select id="function-choice"><option value="sin">sin(x) on [0, π]</option><option value="square">x² on [0, 1]</option><option value="step">Step: 1 or 3 on [0, 1]</option><option value="cusp">|x − ½| on [0, 1]</option><option value="singular">1/√x on (0, 1]</option><option value="dirichlet">Dirichlet on [0, 1]</option><option value="thomae">Thomae on [0, 1]</option></select></div>
+  <div class="table-scroll" tabindex="0" role="region" aria-label="Integral convergence results by partition size">
+    <table><caption id="convergence-caption">Refinement for sin(x) on [0, π]</caption>
+      <thead><tr><th scope="col"><i>N</i> = <i>K</i></th><th scope="col">Domain estimate</th><th scope="col">Absolute difference</th><th scope="col">Range estimate</th><th scope="col">Absolute difference</th></tr></thead>
+      <tbody id="convergence-body"><tr><th scope="row">15</th><td>2.003660091157</td><td>3.660e-3</td><td>1.990612585380</td><td>9.387e-3</td></tr><tr><th scope="row">63</th><td>2.000207237765</td><td>2.072e-4</td><td>1.998865929931</td><td>1.134e-3</td></tr><tr><th scope="row">255</th><td>2.000012648530</td><td>1.265e-5</td><td>1.999858159580</td><td>1.418e-4</td></tr><tr><th scope="row">1,023</th><td>2.000000785900</td><td>7.859e-7</td><td>1.999982188697</td><td>1.781e-5</td></tr><tr><th scope="row">4,095</th><td>2.000000049047</td><td>4.905e-8</td><td>1.999997766104</td><td>2.234e-6</td></tr></tbody>
+    </table>
+  </div>
+  <p>For sin(<i>x</i>) and <i>x</i><sup>2</sup>, the observed orders on the last two refinements are 2.00 and 2.00 for the domain rule, and 1.50 and 1.50 for the range rule. An order <i>p</i> means that the error decreases roughly as <i>N</i><sup>−p</sup>. The range measures have a derivative singularity at an endpoint, whereas the original integrands are smooth. The step’s midpoint error is 1/<i>N</i> for odd <i>N</i> and zero for even <i>N</i>; its range sum is exact at every size. For the cusp, the range bins have constant mass per unit of value, so their midpoint sum is exact. The domain error for odd <i>N</i> is 1/(4<i>N</i><sup>2</sup>).</p>
+  <p>For 1/√<i>x</i>, the observed orders are 0.50 (domain) and 0.49 (range). In the domain rule the first cell alone has error (2 − √2)/√<i>N</i>, and the errors on the other cells are bounded in total by <i>h</i>[<i>f</i>(<i>h</i>) − <i>f</i>(1)] ≤ √<i>h</i>. Thomae’s rational midpoint sums tend to zero, with errors that depend on the denominators of the grid tags. Both rules have the same limit for every bounded Riemann-integrable example. The singular example has equal improper and Lebesgue integrals, while Dirichlet has only a Lebesgue integral.</p>
+
+  <h3>Computational efficiency</h3>
+  <div class="table-scroll" tabindex="0" role="region" aria-label="Computational cost of the integration rules">
+    <table><caption>Work and median time per integral at size 4,095</caption>
+      <thead><tr><th scope="col">Function</th><th scope="col">Domain work</th><th scope="col">Domain (µs)</th><th scope="col">Range work</th><th scope="col">Range (µs)</th></tr></thead>
+      <tbody><tr><th scope="row">sin(x)</th><td>4,095 tagged terms</td><td>59.4</td><td>4,095 boundary measures</td><td>50.2</td></tr><tr><th scope="row">x²</th><td>4,095 tagged terms</td><td>26.7</td><td>4,095 boundary measures</td><td>28.4</td></tr><tr><th scope="row">Step: 1 or 3</th><td>4,095 tagged terms</td><td>18.7</td><td>2 level-set measures</td><td>0.045</td></tr><tr><th scope="row">|x − ½|</th><td>4,095 tagged terms</td><td>27.4</td><td>4,095 boundary measures</td><td>28.9</td></tr><tr><th scope="row">1/√x</th><td>4,095 tagged terms</td><td>30.6</td><td>4,095 boundary measures + cap atom</td><td>11.1</td></tr><tr><th scope="row">Dirichlet</th><td>4,095 tagged terms</td><td>21.5</td><td>2 level-set measures</td><td>0.039</td></tr><tr><th scope="row">Thomae</th><td>4,095 tagged terms and gcds</td><td>118.4</td><td>1 positive-mass level set</td><td>0.021</td></tr></tbody>
+    </table>
+  </div>
+  <p class="caption">Timings: Node.js v24.22.1 on linux (x64), median of five batched runs after warm-up. Timing depends on the machine and JavaScript engine. Deriving the preimage formulas is excluded.</p>
+  <p>Both partition loops use constant working memory. The domain loop uses <i>N</i> terms; Thomae adds a gcd calculation per tag. The range loop reuses each bin’s right boundary as the next left boundary and uses <i>K</i> boundary evaluations when the initial boundary is known. With known level-set measures, the step and the two pathological cases need constant work. For a general integrand, computing preimage measures can be harder than evaluating <i>f</i>. The speed and accuracy in this experiment therefore depend on which information about the function is available.</p>
+  <details><summary>JavaScript for the domain and range rules</summary><pre><code>function gcd(a, b) {
+  while (b) [a, b] = [b, a % b];
+  return a;
+}
+
+function domainMidpoint(spec, n) {
+  const dx = spec.end / n;
+  let sum = 0, correction = 0;
+  for (let i = 0; i &lt; n; i++) {
+    let v;
+    if (spec.id === 'dirichlet') v = 1; // (2i+1)/(2n) is exactly rational.
+    else if (spec.id === 'thomae') v = gcd(2 * i + 1, 2 * n) / (2 * n);
+    else if (spec.id === 'step') v = 2 * i + 1 &lt; n ? 1 : 3;
+    else v = spec.f((i + .5) * dx);
+    const term = v - correction, next = sum + term;
+    correction = (next - sum) - term;
+    sum = next;
+  }
+  return sum * dx;
+}
+
+function rangePartition(spec, k) {
+  if (spec.atoms) {
+    let value = 0;
+    for (const [level, measure] of spec.atoms) value += level * measure;
+    return value;
+  }
+  if (spec.id === 'singular') {
+    const cap = 1 + Math.sqrt(k), dy = (cap - 1) / k;
+    let previous = 1, sum = 1 / cap, correction = 0; // Exact atom at the cap.
+    for (let j = 0; j &lt; k; j++) {
+      const right = j === k - 1 ? cap : 1 + (j + 1) * dy;
+      const next = 1 / (right * right);
+      const term = (1 + (j + .5) * dy) * (previous - next) - correction;
+      const total = sum + term;
+      correction = (total - sum) - term;
+      sum = total;
+      previous = next;
+    }
+    return sum;
+  }
+  const dy = spec.ymax / k;
+  let previous = 0, sum = 0, correction = 0;
+  for (let j = 0; j &lt; k; j++) {
+    const edge = j === k - 1 ? spec.ymax : (j + 1) * dy;
+    const next = spec.below(edge);
+    const term = (j + .5) * dy * (next - previous) - correction;
+    const total = sum + term;
+    correction = (total - sum) - term;
+    sum = total;
+    previous = next;
+  }
+  return sum;
+}</code></pre></details>
+</section>
+
+<section id="cdf" aria-labelledby="cdf-title">
+  <h2 id="cdf-title">2. Numerical computation of the normal CDF</h2>
+  <p>For a standard normal random variable, the density is φ(<i>t</i>) = e<sup>−t²/2</sup>/√(2π), and Φ(<i>z</i>) = ∫<sub>−∞</sub><sup>z</sup> φ(<i>t</i>) d<i>t</i>. The definition and symmetry are described in the supplied <a href="https://faculty.etsu.edu/gardnerr/4047/notes-Hogg-McKean-Craig/Hogg-McKean-Craig-3-4.pdf">ETSU notes</a>.</p>
+
+  <h3>Why elementary functions do not suffice</h3>
+  <p>Let <i>u</i> = e<sup>−x²/2</sup>, so <i>u</i>′ = −<i>x</i><i>u</i>. This exponential is transcendental over the rational functions in <i>x</i>: in any polynomial relation, divide out the lowest power of <i>u</i> and let <i>x</i> tend to +∞. A nonzero rational coefficient cannot be canceled by exponentially decreasing terms.</p>
+  <p>Apply <a href="https://doi.org/10.2140/pjm.1968.24.153">Liouville’s theorem on elementary antiderivatives</a> to the differential field ℂ(<i>x</i>, <i>u</i>). If <i>u</i> had an elementary primitive in an extension with the same constants, the theorem would express <i>u</i> as a derivative <i>v</i>′ plus constant multiples of logarithmic derivatives <i>w</i><sub>j</sub>′/<i>w</i><sub>j</sub>, with <i>v</i> and <i>w</i><sub>j</sub> rational in <i>x</i> and <i>u</i>. In a Laurent expansion at <i>u</i> = ∞, a nonzero rational <i>w</i><sub>j</sub> has a leading term <i>A</i>(<i>x</i>)<i>u</i><sup>d</sup>. Its logarithmic derivative has leading part <i>A</i>′/<i>A</i> − <i>d</i><i>x</i> and no positive powers of <i>u</i>. Therefore the coefficient of <i>u</i> on the right must come from <i>v</i>′. If <i>R</i>(<i>x</i>) is the coefficient of <i>u</i> in <i>v</i>, it must satisfy</p>
+  <div class="equations"><i>R</i>′(<i>x</i>) − <i>x</i><i>R</i>(<i>x</i>) = 1.</div>
+  <p>A finite pole of <i>R</i> would give a higher-order pole in <i>R</i>′ than in <i>xR</i>, so no finite poles are possible. Then <i>R</i> must be a polynomial. If it is nonzero, −<i>xR</i> has strictly higher degree than <i>R</i>′, so the left side cannot be the constant 1. The zero polynomial also fails. Thus the Gaussian density has no elementary antiderivative. Since Φ′ = φ, the normal CDF is non-elementary as well.</p>
+
+  <h3>An exact representation with a special function</h3>
+  <p>The <a href="https://dlmf.nist.gov/7.2">error function</a> is defined by erf(<i>u</i>) = (2/√π) ∫<sub>0</sub><sup>u</sup> e<sup>−s²</sup> d<i>s</i>. By symmetry of φ and the change of variable <i>s</i> = <i>t</i>/√2,</p>
+  <div class="equations">Φ(<i>z</i>) = ½[1 + erf(<i>z</i>/√2)], &nbsp; Q(<i>a</i>) = Φ(−<i>a</i>) = ½ erfc(<i>a</i>/√2), &nbsp; <i>a</i> ≥ 0,</div>
+  <p>where erfc(<i>u</i>) = 1 − erf(<i>u</i>). These identities are exact. A call to erf or erfc still requires a numerical algorithm to return digits; the identities specify the function being evaluated.</p>
+
+  <h3>Chosen algorithm: 32-node Gauss–Legendre quadrature</h3>
+  <p>Compute the smaller tail directly. For <i>a</i> = |<i>z</i>|, shift the integration variable by <i>a</i> and factor out the density at that point:</p>
+  <div class="equations"><i>Q</i>(<i>a</i>) = φ(<i>a</i>) <i>J</i>(<i>a</i>), &nbsp; <i>J</i>(<i>a</i>) = ∫<sub>0</sub><sup>∞</sup> e<sup>−at−t²/2</sup> d<i>t</i>.</div>
+  <p>Truncate at <i>T</i> = 80/(√(<i>a</i><sup>2</sup> + 80) + <i>a</i>), which satisfies <i>aT</i> + <i>T</i><sup>2</sup>/2 = 40. Beyond <i>T</i>, the omitted integral is at most e<sup>−40</sup>/(<i>a</i> + <i>T</i>). On [0, 1/(<i>a</i> + 1)], the integrand is at least e<sup>−1</sup>, so the relative truncation error is at most e<sup>−39</sup>(<i>a</i> + 1)/(<i>a</i> + <i>T</i>) ≤ e<sup>−39</sup>√(81/80) &lt; 1.2 × 10<sup>−17</sup>. This bound covers truncation; the numerical comparison below includes quadrature and rounding error.</p>
+  <p>Map the 32 Gauss–Legendre nodes ξ<sub>i</sub> on [−1, 1] to <i>t</i><sub>i</sub> = (<i>T</i>/2)(1 + ξ<sub>i</sub>) on [0, <i>T</i>]. The nodes and weights <i>w</i><sub>i</sub> are computed once and reused:</p>
+  <div class="equations"><i>Q</i>(<i>a</i>) ≈ φ(<i>a</i>)(<i>T</i>/2) ∑<sub>i=1</sub><sup>32</sup> <i>w</i><sub>i</sub> e<sup>−atᵢ−tᵢ²/2</sup>.</div>
+  <p>Return <i>Q</i>(<i>a</i>) for negative <i>z</i>, 1 − <i>Q</i>(<i>a</i>) for positive <i>z</i>, and ½ at zero. Computing the lower tail directly avoids cancellation there. For large positive <i>z</i>, the CDF can round to 1 in binary64; the small tail itself can still be computed separately. For <i>a</i> ≥ 39 the upper bound φ(<i>a</i>)/<i>a</i> is below half the smallest positive binary64 value, so the tail rounds to zero.</p>
+
+  <form id="cdf-form" class="control inline-control" aria-label="Evaluate the normal CDF">
+    <label for="cdf-input">Evaluate Φ(<i>z</i>)</label><input type="number" id="cdf-input" value="-5" step="any" required><button type="submit">Compute</button>
+  </form>
+  <p class="result" id="cdf-output" role="status" aria-live="polite"></p>
+
+  <h3>Comparison with published numerical values</h3>
+  <p>The reference decimals come from <a href="https://ftp.gnu.org/gnu/gsl/gsl-2.8.tar.gz">GNU Scientific Library 2.8</a>, <code>cdf/test.c</code>, function <code>test_ugaussian</code>. The suite records Gaussian reference values computed with PARI at 28 digits of precision. The decimals are rounded to binary64 for this comparison. The largest absolute difference over the 13 points is <strong>3.331e-16</strong>, and the largest relative difference at <i>z</i> ≤ −5 is <strong>1.928e-15</strong>. Agreement at +10 and +30 means both values round to 1 at this precision.</p>
+  <div class="table-scroll" tabindex="0" role="region" aria-label="Normal CDF comparison with GNU Scientific Library references">
+    <table>
+      <thead><tr><th scope="col"><i>z</i></th><th scope="col">GSL reference</th><th scope="col">Computed Φ(<i>z</i>)</th><th scope="col">Absolute error</th><th scope="col">Relative error</th></tr></thead>
+      <tbody><tr><th scope="row">-30</th><td title="Published decimal: 4.906713927148187059533809288e-198">4.9067139271481872e-198</td><td>4.9067139271481961e-198</td><td>8.911e-213</td><td>1.816e-15</td></tr><tr><th scope="row">-10</th><td title="Published decimal: 7.619853024160526065973343257e-24">7.6198530241605255e-24</td><td>7.6198530241605401e-24</td><td>1.469e-38</td><td>1.928e-15</td></tr><tr><th scope="row">-5</th><td title="Published decimal: 0.0000002866515718791939116737523329">2.8665157187919391e-7</td><td>2.8665157187919439e-7</td><td>4.765e-22</td><td>1.662e-15</td></tr><tr><th scope="row">-0.7</th><td title="Published decimal: 0.2419636522230730147493504282">0.24196365222307301</td><td>0.24196365222307331</td><td>3.053e-16</td><td>1.262e-15</td></tr><tr><th scope="row">-0.5</th><td title="Published decimal: 0.3085375387259868963622953894">0.30853753872598688</td><td>0.30853753872598721</td><td>3.331e-16</td><td>1.080e-15</td></tr><tr><th scope="row">-1e-8</th><td title="Published decimal: 0.4999999960105771959856732870">0.49999999601057721</td><td>0.49999999601057749</td><td>2.776e-16</td><td>5.551e-16</td></tr><tr><th scope="row">0</th><td title="Published decimal: 0.5">0.50000000000000000</td><td>0.50000000000000000</td><td>0</td><td>0</td></tr><tr><th scope="row">1e-8</th><td title="Published decimal: 0.5000000039894228040143267129">0.50000000398942279</td><td>0.50000000398942257</td><td>2.220e-16</td><td>4.441e-16</td></tr><tr><th scope="row">0.5</th><td title="Published decimal: 0.6914624612740131036377046105">0.69146246127401312</td><td>0.69146246127401279</td><td>3.331e-16</td><td>4.817e-16</td></tr><tr><th scope="row">0.7</th><td title="Published decimal: 0.7580363477769269852506495717">0.75803634777692697</td><td>0.75803634777692674</td><td>2.220e-16</td><td>2.929e-16</td></tr><tr><th scope="row">5</th><td title="Published decimal: 0.9999997133484281208060883262">0.99999971334842808</td><td>0.99999971334842808</td><td>0</td><td>0</td></tr><tr><th scope="row">10</th><td title="Published decimal: 0.9999999999999999999999923801">1</td><td>1</td><td>0</td><td>0</td></tr><tr><th scope="row">30</th><td title="Published decimal: 1.000000000000000000000000000">1</td><td>1</td><td>0</td><td>0</td></tr></tbody>
+    </table>
+  </div>
+
+  <h3>Alternative methods and their cost</h3>
+  <p><strong>Composite Simpson.</strong> Integrate the same scaled integrand over [0, <i>T</i>] with an even number <i>M</i> of panels. The code combines endpoints and interior values with weights 1, 4, 2, …, 4, 1, then multiplies by <i>T</i>/(3<i>M</i>). At <i>z</i> = −5, the observed order between 128 and 512 panels is 4.00, close to the fourth-order convergence expected for this smooth integrand.</p>
+  <div class="table-scroll" tabindex="0" role="region" aria-label="Simpson rule refinement for the CDF at minus five">
+    <table class="compact-table"><caption>Simpson refinement at <i>z</i> = −5</caption>
+      <thead><tr><th scope="col">Panels</th><th scope="col">Absolute error</th><th scope="col">Relative error</th></tr></thead>
+      <tbody><tr><th scope="row">32</th><td>6.208e-10</td><td>2.166e-3</td></tr><tr><th scope="row">128</th><td>2.556e-12</td><td>8.918e-6</td></tr><tr><th scope="row">512</th><td>1.002e-14</td><td>3.495e-8</td></tr><tr><th scope="row">2,048</th><td>3.914e-17</td><td>1.365e-10</td></tr></tbody>
+    </table>
+  </div>
+  <p><strong>Series for erf.</strong> Termwise integration of the exponential series gives</p>
+  <div class="equations">erf(<i>u</i>) = (2/√π) ∑<sub>k=0</sub><sup>∞</sup> (−1)<sup>k</sup><i>u</i><sup>2k+1</sup> / [<i>k</i>!(2<i>k</i> + 1)].</div>
+  <p>The implementation updates each term from the preceding term, so it needs neither powers nor factorials at every iteration. It uses this series for |<i>z</i>| ≤ 2 and stops once the term magnitude is at most 10<sup>−17</sup>. For large arguments, alternating terms can be large before they decay, and forming a small CDF by subtracting nearly equal quantities loses precision. Direct tail integration avoids that problem.</p>
+  <div class="table-scroll" tabindex="0" role="region" aria-label="Accuracy and timing of three normal CDF methods">
+    <table><caption>Measured accuracy and cost</caption>
+      <thead><tr><th scope="col">Method</th><th scope="col">Work per nonzero argument</th><th scope="col">Max absolute error, |<i>z</i>| ≤ 2</th><th scope="col">Max absolute error, all points</th><th scope="col">Max relative error, <i>z</i> ≤ −5</th><th scope="col">Time (µs)</th></tr></thead>
+      <tbody><tr><th scope="row">Gauss–Legendre</th><td>32 nodes</td><td>3.331e-16</td><td>3.331e-16</td><td>1.928e-15</td><td>0.307</td></tr><tr><th scope="row">Composite Simpson</th><td>513 nodes (512 panels)</td><td>2.077e-10</td><td>2.077e-10</td><td>1.893e-7</td><td>4.31</td></tr><tr><th scope="row">erf power series</th><td>Up to 13 terms on these points</td><td>2.776e-17</td><td>—</td><td>—</td><td>0.016</td></tr></tbody>
+    </table>
+  </div>
+  <p class="caption">Times use the same nonzero central reference arguments for all three methods and the same benchmark protocol as Exercise 1. Node generation for Gauss–Legendre is a one-time cost. The dash marks points outside the implemented series range.</p>
+  <p>The series is useful near zero. For the tested central and tail arguments together, the 32-node rule achieves much smaller errors than 512-panel Simpson with about sixteen times fewer integrand evaluations. The reference comparisons quantify accuracy on these points; they do not give a uniform rounding-error guarantee.</p>
+  <details><summary>JavaScript for the normal CDF methods</summary><pre><code>function legendrePair(n, x) {
+  let p0 = 1, p1 = x;
+  for (let j = 2; j &lt;= n; j++) {
+    const p = ((2 * j - 1) * x * p1 - (j - 1) * p0) / j;
+    p0 = p1;
+    p1 = p;
+  }
+  return [p1, n * (p0 - x * p1) / (1 - x * x)];
+}
+
+function gaussLegendre(n) {
+  const nodes = new Float64Array(n), weights = new Float64Array(n);
+  for (let i = 0; i &lt; n / 2; i++) {
+    let x = Math.cos(Math.PI * (i + .75) / (n + .5));
+    for (let j = 0; j &lt; 30; j++) {
+      const [p, dp] = legendrePair(n, x), next = x - p / dp;
+      const change = Math.abs(next - x);
+      x = next;
+      if (change &lt;= Number.EPSILON) break;
+    }
+    const [, dp] = legendrePair(n, x), w = 2 / ((1 - x * x) * dp * dp);
+    nodes[i] = -x;
+    nodes[n - 1 - i] = x;
+    weights[i] = weights[n - 1 - i] = w;
+  }
+  return { nodes, weights };
+}
+
+const GL32 = gaussLegendre(32);
+const inverseSqrt2Pi = 1 / Math.sqrt(2 * Math.PI);
+const cut = a =&gt; 80 / (Math.sqrt(a * a + 80) + a);
+const scaledDensity = (a, t) =&gt; Math.exp(-t * (a + t / 2));
+const density = a =&gt; inverseSqrt2Pi * Math.exp(-a * a / 2);
+
+function tailGauss(a) {
+  if (a === 0) return .5;
+  if (a &gt;= 39) return 0; // Below half the smallest positive binary64 number.
+  const h = cut(a) / 2;
+  let sum = 0;
+  for (let i = 0; i &lt; 32; i++) {
+    const t = h * (1 + GL32.nodes[i]);
+    sum += GL32.weights[i] * scaledDensity(a, t);
+  }
+  return density(a) * (h * sum);
+}
+
+function normalCDF(z) {
+  const q = tailGauss(Math.abs(z));
+  return z &lt; 0 ? q : 1 - q;
+}
+
+function simpsonCDF(z, panels = 512) {
+  if (z === 0) return .5;
+  const a = Math.abs(z);
+  if (a &gt;= 39) return z &lt; 0 ? 0 : 1;
+  const T = cut(a), h = T / panels;
+  let sum = 1 + scaledDensity(a, T);
+  for (let i = 1; i &lt; panels; i++) sum += (i % 2 ? 4 : 2) * scaledDensity(a, i * h);
+  const q = density(a) * (h * sum / 3);
+  return z &lt; 0 ? q : 1 - q;
+}
+
+function seriesCDF(z) {
+  if (Math.abs(z) &gt; 2) return null;
+  const u = z / Math.SQRT2, u2 = u * u;
+  let term = u, sum = u, terms = 1;
+  for (let k = 0; k &lt; 64 &amp;&amp; Math.abs(term) &gt; 1e-17; k++) {
+    term *= -u2 * (2 * k + 1) / ((k + 1) * (2 * k + 3));
+    sum += term;
+    terms++;
+  }
+  return { value: .5 + sum / Math.sqrt(Math.PI), terms };
+}</code></pre></details>
+</section>
+</main>
+  <script type="application/json" id="reference-data">{"integration":[{"id":"sin","label":"sin(x)","domain":"[0, π]","exact":"2","rows":[{"n":15,"domain":2.0036600911565396,"range":1.9906125853796528,"domainError":0.0036600911565396466,"rangeError":0.0093874146203472},{"n":63,"domain":2.0002072377649753,"range":1.9988659299309166,"domainError":0.00020723776497533208,"rangeError":0.0011340700690833927},{"n":255,"domain":2.0000126485301726,"range":1.9998581595796194,"domainError":0.0000126485301725765,"rangeError":0.00014184042038056788},{"n":1023,"domain":2.0000007859001134,"range":1.999982188697371,"domainError":7.859001134313814e-7,"rangeError":0.00001781130262901165},{"n":4095,"domain":2.000000049046802,"range":1.9999977661038941,"domainError":4.904680217521218e-8,"rangeError":0.0000022338961058743223}]},{"id":"square","label":"x²","domain":"[0, 1]","exact":"1/3","rows":[{"n":15,"domain":0.33296296296296296,"range":0.3367265579255728,"domainError":0.00037037037037035425,"rangeError":0.0033932245922395077},{"n":63,"domain":0.3333123372805912,"range":0.3337385687128773,"domainError":0.000020996052742139337,"rangeError":0.0004052353795440111},{"n":255,"domain":0.33333205177495834,"range":0.33338374486950934,"domainError":0.0000012815583749770099,"rangeError":0.000050411536176020455},{"n":1023,"domain":0.33333325370502553,"range":0.33333964700788743,"domainError":7.962830778085461e-8,"rangeError":0.000006313674554114801},{"n":4095,"domain":0.3333333283638534,"range":0.3333341241621097,"domainError":4.9694799386657e-9,"rangeError":7.908287764091249e-7}]},{"id":"step","label":"Step: 1 or 3","domain":"[0, 1]","exact":"2","rows":[{"n":15,"domain":2.0666666666666664,"range":2,"domainError":0.06666666666666643,"rangeError":0},{"n":63,"domain":2.015873015873016,"range":2,"domainError":0.015873015873015817,"rangeError":0},{"n":255,"domain":2.003921568627451,"range":2,"domainError":0.0039215686274509665,"rangeError":0},{"n":1023,"domain":2.0009775171065494,"range":2,"domainError":0.0009775171065493637,"rangeError":0},{"n":4095,"domain":2.0002442002442002,"range":2,"domainError":0.00024420024420024333,"rangeError":0}]},{"id":"cusp","label":"|x − ½|","domain":"[0, 1]","exact":"1/4","rows":[{"n":15,"domain":0.24888888888888888,"range":0.25,"domainError":0.0011111111111111183,"rangeError":0},{"n":63,"domain":0.24993701184177372,"range":0.25,"domainError":0.00006298815822627923,"rangeError":0},{"n":255,"domain":0.24999615532487504,"range":0.25,"domainError":0.000003844675124958785,"rangeError":0},{"n":1023,"domain":0.2499997611150766,"range":0.25,"domainError":2.38884923398075e-7,"rangeError":0},{"n":4095,"domain":0.24999998509156018,"range":0.25,"domainError":1.49084398159971e-8,"rangeError":0}]},{"id":"singular","label":"1/√x","domain":"(0, 1]","exact":"2","rows":[{"n":15,"domain":1.843908389523995,"range":1.8056603769176083,"domainError":0.15609161047600506,"rangeError":0.19433962308239172},{"n":63,"domain":1.9237951832069342,"range":1.8907422991586889,"domainError":0.07620481679306579,"rangeError":0.10925770084131115},{"n":255,"domain":1.962120097973547,"range":1.9417209835745604,"domainError":0.03787990202645308,"rangeError":0.058279016425439645},{"n":1023,"domain":1.9810877005135694,"range":1.9698454945152202,"domainError":0.018912299486430584,"rangeError":0.030154505484779826},{"n":4095,"domain":1.9905473059750052,"range":1.9846542330727799,"domainError":0.009452694024994823,"rangeError":0.015345766927220117}]},{"id":"dirichlet","label":"Dirichlet","domain":"[0, 1]","exact":"0","rows":[{"n":15,"domain":1,"range":0,"domainError":1,"rangeError":0},{"n":63,"domain":1,"range":0,"domainError":1,"rangeError":0},{"n":255,"domain":1,"range":0,"domainError":1,"rangeError":0},{"n":1023,"domain":1,"range":0,"domainError":1,"rangeError":0},{"n":4095,"domain":1,"range":0,"domainError":1,"rangeError":0}]},{"id":"thomae","label":"Thomae","domain":"[0, 1]","exact":"0","rows":[{"n":15,"domain":0.1,"range":0,"domainError":0.1,"rangeError":0},{"n":63,"domain":0.03439153439153439,"range":0,"domainError":0.03439153439153439,"rangeError":0},{"n":255,"domain":0.011418685121107266,"range":0,"domainError":0.011418685121107266,"rangeError":0},{"n":1023,"domain":0.0030601158687432453,"range":0,"domainError":0.0030601158687432453,"rangeError":0},{"n":4095,"domain":0.0018315018315018315,"range":0,"domainError":0.0018315018315018315,"rangeError":0}]}],"cdf":[{"z":-30,"published":"4.906713927148187059533809288e-198","reference":4.906713927148187e-198,"gauss":4.906713927148196e-198,"simpson":4.906714856183976e-198,"series":null,"gaussAbs":8.911366717008562e-213,"gaussRel":1.81615778896405e-15},{"z":-10,"published":"7.619853024160526065973343257e-24","reference":7.619853024160525e-24,"gauss":7.61985302416054e-24,"simpson":7.619853845779192e-24,"series":null,"gaussAbs":1.4693679385278594e-38,"gaussRel":1.9283415754462517e-15},{"z":-5,"published":"0.0000002866515718791939116737523329","reference":2.866515718791939e-7,"gauss":2.866515718791944e-7,"simpson":2.8665158189765635e-7,"series":null,"gaussAbs":4.764560328305439e-22,"gaussRel":1.6621434506954002e-15},{"z":-0.7,"published":"0.2419636522230730147493504282","reference":0.241963652223073,"gauss":0.2419636522230733,"simpson":0.2419636520154163,"series":{"value":0.24196365222307303,"terms":13},"gaussAbs":3.0531133177191805e-16,"gaussRel":1.261806593539277e-15},{"z":-0.5,"published":"0.3085375387259868963622953894","reference":0.3085375387259869,"gauss":0.3085375387259872,"simpson":0.30853753852565163,"series":{"value":0.3085375387259869,"terms":11},"gaussAbs":3.3306690738754696e-16,"gaussRel":1.0795020559340907e-15},{"z":-1e-8,"published":"0.4999999960105771959856732870","reference":0.4999999960105772,"gauss":0.4999999960105775,"simpson":0.49999999601057765,"series":{"value":0.4999999960105772,"terms":2},"gaussAbs":2.7755575615628914e-16,"gaussRel":5.551115167417274e-16},{"z":0,"published":"0.5","reference":0.5,"gauss":0.5,"simpson":0.5,"series":{"value":0.5,"terms":1},"gaussAbs":0,"gaussRel":0},{"z":1e-8,"published":"0.5000000039894228040143267129","reference":0.5000000039894228,"gauss":0.5000000039894226,"simpson":0.5000000039894223,"series":{"value":0.5000000039894228,"terms":2},"gaussAbs":2.220446049250313e-16,"gaussRel":4.4408920630674343e-16},{"z":0.5,"published":"0.6914624612740131036377046105","reference":0.6914624612740131,"gauss":0.6914624612740128,"simpson":0.6914624614743483,"series":{"value":0.6914624612740131,"terms":11},"gaussAbs":3.3306690738754696e-16,"gaussRel":4.816847277202501e-16},{"z":0.7,"published":"0.7580363477769269852506495717","reference":0.758036347776927,"gauss":0.7580363477769267,"simpson":0.7580363479845837,"series":{"value":0.758036347776927,"terms":13},"gaussAbs":2.220446049250313e-16,"gaussRel":2.929207887935923e-16},{"z":5,"published":"0.9999997133484281208060883262","reference":0.9999997133484281,"gauss":0.9999997133484281,"simpson":0.9999997133484181,"series":null,"gaussAbs":0,"gaussRel":0},{"z":10,"published":"0.9999999999999999999999923801","reference":1,"gauss":1,"simpson":1,"series":null,"gaussAbs":0,"gaussRel":0},{"z":30,"published":"1.000000000000000000000000000","reference":1,"gauss":1,"simpson":1,"series":null,"gaussAbs":0,"gaussRel":0}]}</script>
+  <script>'use strict';
+
+const HOMEWORK = (() => {
+  const sizes = Object.freeze([15, 63, 255, 1023, 4095]);
+  const functions = Object.freeze([
+    { id: 'sin', label: 'sin(x)', domain: '[0, π]', end: Math.PI, value: 2, ymax: 1, f: Math.sin, below: y => 2 * Math.asin(y) },
+    { id: 'square', label: 'x²', domain: '[0, 1]', end: 1, value: 1 / 3, ymax: 1, f: x => x * x, below: Math.sqrt },
+    { id: 'step', label: 'Step: 1 or 3', domain: '[0, 1]', end: 1, value: 2, atoms: [[1, .5], [3, .5]] },
+    { id: 'cusp', label: '|x − ½|', domain: '[0, 1]', end: 1, value: .25, ymax: .5, f: x => Math.abs(x - .5), below: y => 2 * y },
+    { id: 'singular', label: '1/√x', domain: '(0, 1]', end: 1, value: 2, f: x => 1 / Math.sqrt(x) },
+    { id: 'dirichlet', label: 'Dirichlet', domain: '[0, 1]', end: 1, value: 0, atoms: [[0, 1], [1, 0]] },
+    { id: 'thomae', label: 'Thomae', domain: '[0, 1]', end: 1, value: 0, atoms: [[0, 1]] },
+  ]);
+
+  function gcd(a, b) {
+    while (b) [a, b] = [b, a % b];
+    return a;
+  }
+
+  function domainMidpoint(spec, n) {
+    const dx = spec.end / n;
+    let sum = 0, correction = 0;
+    for (let i = 0; i < n; i++) {
+      let v;
+      if (spec.id === 'dirichlet') v = 1; // (2i+1)/(2n) is exactly rational.
+      else if (spec.id === 'thomae') v = gcd(2 * i + 1, 2 * n) / (2 * n);
+      else if (spec.id === 'step') v = 2 * i + 1 < n ? 1 : 3;
+      else v = spec.f((i + .5) * dx);
+      const term = v - correction, next = sum + term;
+      correction = (next - sum) - term;
+      sum = next;
+    }
+    return sum * dx;
+  }
+
+  function rangePartition(spec, k) {
+    if (spec.atoms) {
+      let value = 0;
+      for (const [level, measure] of spec.atoms) value += level * measure;
+      return value;
+    }
+    if (spec.id === 'singular') {
+      const cap = 1 + Math.sqrt(k), dy = (cap - 1) / k;
+      let previous = 1, sum = 1 / cap, correction = 0; // Exact atom at the cap.
+      for (let j = 0; j < k; j++) {
+        const right = j === k - 1 ? cap : 1 + (j + 1) * dy;
+        const next = 1 / (right * right);
+        const term = (1 + (j + .5) * dy) * (previous - next) - correction;
+        const total = sum + term;
+        correction = (total - sum) - term;
+        sum = total;
+        previous = next;
+      }
+      return sum;
+    }
+    const dy = spec.ymax / k;
+    let previous = 0, sum = 0, correction = 0;
+    for (let j = 0; j < k; j++) {
+      const edge = j === k - 1 ? spec.ymax : (j + 1) * dy;
+      const next = spec.below(edge);
+      const term = (j + .5) * dy * (next - previous) - correction;
+      const total = sum + term;
+      correction = (total - sum) - term;
+      sum = total;
+      previous = next;
+    }
+    return sum;
+  }
+
+  function legendrePair(n, x) {
+    let p0 = 1, p1 = x;
+    for (let j = 2; j <= n; j++) {
+      const p = ((2 * j - 1) * x * p1 - (j - 1) * p0) / j;
+      p0 = p1;
+      p1 = p;
+    }
+    return [p1, n * (p0 - x * p1) / (1 - x * x)];
+  }
+
+  function gaussLegendre(n) {
+    const nodes = new Float64Array(n), weights = new Float64Array(n);
+    for (let i = 0; i < n / 2; i++) {
+      let x = Math.cos(Math.PI * (i + .75) / (n + .5));
+      for (let j = 0; j < 30; j++) {
+        const [p, dp] = legendrePair(n, x), next = x - p / dp;
+        const change = Math.abs(next - x);
+        x = next;
+        if (change <= Number.EPSILON) break;
+      }
+      const [, dp] = legendrePair(n, x), w = 2 / ((1 - x * x) * dp * dp);
+      nodes[i] = -x;
+      nodes[n - 1 - i] = x;
+      weights[i] = weights[n - 1 - i] = w;
+    }
+    return { nodes, weights };
+  }
+
+  const GL32 = gaussLegendre(32);
+  const inverseSqrt2Pi = 1 / Math.sqrt(2 * Math.PI);
+  const cut = a => 80 / (Math.sqrt(a * a + 80) + a);
+  const scaledDensity = (a, t) => Math.exp(-t * (a + t / 2));
+  const density = a => inverseSqrt2Pi * Math.exp(-a * a / 2);
+
+  function tailGauss(a) {
+    if (a === 0) return .5;
+    if (a >= 39) return 0; // Below half the smallest positive binary64 number.
+    const h = cut(a) / 2;
+    let sum = 0;
+    for (let i = 0; i < 32; i++) {
+      const t = h * (1 + GL32.nodes[i]);
+      sum += GL32.weights[i] * scaledDensity(a, t);
+    }
+    return density(a) * (h * sum);
+  }
+
+  function normalCDF(z) {
+    const q = tailGauss(Math.abs(z));
+    return z < 0 ? q : 1 - q;
+  }
+
+  function simpsonCDF(z, panels = 512) {
+    if (z === 0) return .5;
+    const a = Math.abs(z);
+    if (a >= 39) return z < 0 ? 0 : 1;
+    const T = cut(a), h = T / panels;
+    let sum = 1 + scaledDensity(a, T);
+    for (let i = 1; i < panels; i++) sum += (i % 2 ? 4 : 2) * scaledDensity(a, i * h);
+    const q = density(a) * (h * sum / 3);
+    return z < 0 ? q : 1 - q;
+  }
+
+  function seriesCDF(z) {
+    if (Math.abs(z) > 2) return null;
+    const u = z / Math.SQRT2, u2 = u * u;
+    let term = u, sum = u, terms = 1;
+    for (let k = 0; k < 64 && Math.abs(term) > 1e-17; k++) {
+      term *= -u2 * (2 * k + 1) / ((k + 1) * (2 * k + 3));
+      sum += term;
+      terms++;
+    }
+    return { value: .5 + sum / Math.sqrt(Math.PI), terms };
+  }
+
+  function integrationRows(spec) {
+    return sizes.map(n => {
+      const domain = domainMidpoint(spec, n), range = rangePartition(spec, n);
+      return { n, domain, range, domainError: Math.abs(domain - spec.value), rangeError: Math.abs(range - spec.value) };
+    });
+  }
+
+  return { sizes, functions, domainMidpoint, rangePartition, integrationRows, normalCDF, tailGauss, simpsonCDF, seriesCDF, GL32 };
+})();
+
+if (typeof module !== 'undefined' && module.exports) module.exports = HOMEWORK;
+
+const DISPLAY = (() => {
+  const integer = n => n.toLocaleString('en-US');
+  function value(x, digits = 13) {
+    if (x === 0 || x === 1) return String(x);
+    if (Math.abs(x) < 1e-5) return x.toExponential(digits - 1);
+    return x.toPrecision(digits);
+  }
+  const error = x => x === 0 ? '0' : x.toExponential(3);
+  const time = x => x.toFixed(x >= 10 ? 1 : x >= 1 ? 2 : 3);
+
+  function convergenceRows(rows) {
+    return rows.map(r => `<tr><th scope="row">${integer(r.n)}</th><td>${value(r.domain)}</td><td>${error(r.domainError)}</td><td>${value(r.range)}</td><td>${error(r.rangeError)}</td></tr>`).join('');
+  }
+
+  function snapshotRows(rows) {
+    return rows.map(r => `<tr><th scope="row">${r.label} <span class="muted">${r.domain}</span></th><td>${r.exact}</td><td>${value(r.last.domain)}</td><td>${error(r.last.domainError)}</td><td>${value(r.last.range)}</td><td>${error(r.last.rangeError)}</td></tr>`).join('');
+  }
+
+  function cdfRows(rows) {
+    return rows.map(r => `<tr><th scope="row">${r.z}</th><td title="Published decimal: ${r.published}">${value(r.reference, 17)}</td><td>${value(r.gauss, 17)}</td><td>${error(r.gaussAbs)}</td><td>${error(r.gaussRel)}</td></tr>`).join('');
+  }
+
+  return { integer, value, error, time, convergenceRows, snapshotRows, cdfRows };
+})();
+
+if (typeof module !== 'undefined' && module.exports) module.exports = DISPLAY;
+
+const el = id => document.getElementById(id);
+el('function-choice').addEventListener('change', () => {
+  const f = HOMEWORK.functions.find(v => v.id === el('function-choice').value);
+  if (!f) return;
+  el('convergence-caption').textContent = `Refinement for ${f.label} on ${f.domain}`;
+  el('convergence-body').innerHTML = DISPLAY.convergenceRows(HOMEWORK.integrationRows(f));
+});
+
+function evaluateCDF() {
+  const z = el('cdf-input').valueAsNumber;
+  if (!Number.isFinite(z)) {
+    el('cdf-output').textContent = 'Enter a finite real number.';
+    return;
+  }
+  const q = HOMEWORK.tailGauss(Math.abs(z));
+  const p = z < 0 ? q : 1 - q;
+  el('cdf-output').textContent = `Φ(${z}) = ${DISPLAY.value(p, 17)}  ·  Q(|z|) = ${DISPLAY.value(q, 17)}`;
+}
+el('cdf-form').addEventListener('submit', e => { e.preventDefault(); evaluateCDF(); });
+evaluateCDF();
+</script>
+</body>
+</html>
