@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Statistical independence: contingency tables, conditional and marginal frequencies, and Pearson’s chi-square test.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Homework 6 — Statistical Independence — Mattia Livieri</title>
+  <style>:root {
+  --paper:#fff; --bg:#f5f8f6; --ink:#192e36; --muted:#51666c;
+  --accent:#11675e; --soft:#eef6f1; --rule:#d5e3dc; --code:#17313e;
+}
+* { box-sizing:border-box }
+body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.65 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif }
+header,main { max-width:1050px; padding:0 28px; margin:auto }
+header { padding-top:40px; padding-bottom:22px; border-bottom:2px solid var(--accent) }
+h1,h2,h3 { line-height:1.24 }
+h1 { margin:0 0 10px; font-size:clamp(2rem,4.2vw,2.65rem); letter-spacing:-.025em }
+h2 { margin:0 0 15px; font-size:1.58rem; letter-spacing:-.015em }
+h3 { margin:23px 0 9px; font-size:1.12rem }
+header p { margin:0; color:var(--muted) }
+header .eyebrow { margin-bottom:9px; color:var(--accent); font-size:.83rem; font-weight:720; letter-spacing:.04em }
+main { padding-bottom:16px }
+section { margin:24px 0; padding:22px 25px; background:var(--paper); border:1px solid var(--rule); border-radius:9px }
+p { margin:10px 0 15px }
+a { color:var(--accent); text-underline-offset:3px; overflow-wrap:anywhere }
+sub { font-size:.76em; line-height:0 }
+.formula { border:1px solid var(--rule); border-left:3px solid var(--accent); border-radius:5px; margin:13px 0; padding:10px 13px; background:#f2f7f3; overflow-wrap:anywhere }
+.note { color:var(--muted); font-size:.85rem; line-height:1.55 }
+.data-entry,.source-code { margin:14px 0; padding:10px 13px; border:1px solid var(--rule); border-radius:6px; background:#f8fbf9 }
+summary { cursor:pointer; font-size:.9rem; font-weight:670 }
+form { padding:12px 0 2px }
+label { font-weight:650 }
+form p { margin:5px 0 8px }
+textarea,button { font:inherit }
+textarea { width:100%; display:block; resize:vertical; padding:9px; border:1px solid #99b1a8; border-radius:5px; color:var(--ink); background:#fff; font: .85rem/1.55 ui-monospace,Consolas,monospace }
+button { padding:7px 13px; color:#fff; background:var(--accent); border:1px solid var(--accent); border-radius:5px; font-size:.87rem; font-weight:680; cursor:pointer }
+:focus-visible { outline:3px solid #b77b28; outline-offset:2px }
+.form-actions { display:flex; align-items:center; flex-wrap:wrap; gap:8px 13px; margin-top:9px }
+.status { margin:0; color:var(--muted); font-size:.84rem }
+.status.error { color:#992a20 }
+.data-summary { padding:9px 13px; border-left:3px solid var(--accent); background:var(--soft); font-size:.91rem }
+#data-summary { color:var(--muted) }
+.table-scroll { max-width:100%; margin:15px 0; overflow-x:auto }
+table { width:100%; border-collapse:collapse; font-size:.89rem; line-height:1.45; font-variant-numeric:tabular-nums }
+caption { margin:0 0 7px; text-align:left; color:var(--ink); font-weight:690; font-size:.94rem }
+th,td { padding:8px 10px; border-bottom:1px solid var(--rule); vertical-align:top; text-align:right; white-space:nowrap }
+th { font-weight:650; white-space:normal; overflow-wrap:anywhere; min-width:5ch }
+th:first-child { text-align:left }
+thead,tfoot { background:#e9f3ed }
+tbody tr:nth-child(even) { background:#f7faf8 }
+.cell-note { display:block; color:var(--muted); font-size:.79rem }
+.comparison { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px }
+.comparison .table-scroll { margin-bottom:7px }
+.test-panel { padding:12px 14px; border:1px solid var(--rule); border-radius:7px; background:var(--soft) }
+.test-numbers { display:flex; gap:12px 24px; flex-wrap:wrap; font-size:.9rem }
+.test-numbers>span>span { display:block; color:var(--muted) }
+.test-numbers b { display:block; color:var(--accent); font-size:1.2rem; font-variant-numeric:tabular-nums }
+.decision { margin:10px 0 1px }
+pre { margin:10px 0 0; max-height:350px; overflow:auto; background:var(--code); color:#ecf7f4; border-radius:5px; padding:12px; font: .78rem/1.55 ui-monospace,Consolas,monospace }
+.reference { margin-bottom:0 }
+@media (max-width:700px) {
+  header,main { padding-left:14px; padding-right:14px }
+  header { padding-top:27px }
+  section { margin:17px 0; padding:16px 14px }
+  h2 { font-size:1.36rem }
+  .comparison { grid-template-columns:1fr; gap:2px }
+  th,td { padding:7px 6px }
+}
+@media print {
+  @page { size:A4; margin:15mm }
+  body { background:white; font-size:10pt }
+  header,main,section { margin:0; padding:0; max-width:none }
+  header { padding-bottom:10px }
+  section { margin-top:15px; border:0 }
+  h1 { font-size:19pt }
+  h2,h3,caption { break-after:avoid }
+  h2 { font-size:14pt }
+  .data-entry,.source-code { display:none }
+  .comparison { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px }
+  .formula,tr,.test-panel { break-inside:avoid }
+  th,td { padding:4px 6px }
+}
+</style>
+</head>
+<body>
+  <header>
+    <p class="eyebrow">Homework 6 · Mattia Livieri</p>
+    <h1>Statistical Independence</h1>
+    <p>Contingency tables and Pearson’s chi-square test</p>
+  </header>
+  <main><section aria-labelledby="theory-title">
+  <h2 id="theory-title">1. What independence means</h2>
+  <p><strong>In probability:</strong> <i>X</i> and <i>F</i> are independent if P(<i>X</i> ∈ <i>A</i>, <i>F</i> ∈ <i>B</i>) = P(<i>X</i> ∈ <i>A</i>) P(<i>F</i> ∈ <i>B</i>) for all measurable sets <i>A</i> and <i>B</i>. For categorical variables, it is enough to check every category pair:</p>
+  <div class="formula">P(<i>X</i> = <i>x</i><sub>i</sub>, <i>F</i> = <i>f</i><sub>j</sub>) = P(<i>X</i> = <i>x</i><sub>i</sub>) P(<i>F</i> = <i>f</i><sub>j</sub>).</div>
+  <p>Equivalently, knowing the category of <i>X</i> leaves the distribution of <i>F</i> unchanged: P(<i>F</i> = <i>f</i><sub>j</sub> | <i>X</i> = <i>x</i><sub>i</sub>) = P(<i>F</i> = <i>f</i><sub>j</sub>) whenever the conditioning event has positive probability.</p>
+  <p><strong>In statistics:</strong> exact independence in the sample would mean that every observed cell proportion equals the product of its two marginal proportions. Even when the variables are independent in the population, sample proportions can differ from those products by chance. Pearson’s chi-square test assesses whether the observed differences are unusually large under independence.</p>
+</section>
+<section aria-labelledby="analysis-title">
+  <h2 id="analysis-title">2. Contingency table and frequencies</h2>
+  <p>The worked example uses 100 synthetic paired observations: <i>X</i> is study method (practice quizzes or reading notes), and <i>F</i> is exam result (pass or fail). The program adds one to the cell for each observed <i>(X, F)</i> pair.</p>
+  <details class="data-entry">
+    <summary>View or edit the paired data</summary>
+    <form id="data-form">
+      <label for="pairs">Paired observations (<i>X</i>, <i>F</i>)</label>
+      <p id="input-help" class="note">Enter one comma-separated pair per line, without a header. Quote labels that contain commas. Treat values as categories; for continuous data, define meaningful bins first and interpret the result for those bins.</p>
+      <textarea id="pairs" rows="7" aria-describedby="input-help" spellcheck="false" required>Practice quizzes,Pass
+Practice quizzes,Pass
+Practice quizzes,Pass
+Practice quizzes,Pass
+Practice quizzes,Pass
+Practice quizzes,Pass
+Practice quizzes,Pass
+Practice quizzes,Pass
+Practice quizzes,Pass
+Practice quizzes,Pass
+Practice quizzes,Pass
+Practice quizzes,Pass
+Practice quizzes,Pass
+Practice quizzes,Pass
+Practice quizzes,Pass
+Practice quizzes,Pass
+Practice quizzes,Pass
+Practice quizzes,Pass
+Practice quizzes,Pass
+Practice quizzes,Pass
+Practice quizzes,Pass
+Practice quizzes,Pass
+Practice quizzes,Pass
+Practice quizzes,Pass
+Practice quizzes,Pass
+Practice quizzes,Pass
+Practice quizzes,Pass
+Practice quizzes,Pass
+Practice quizzes,Pass
+Practice quizzes,Pass
+Practice quizzes,Pass
+Practice quizzes,Pass
+Practice quizzes,Pass
+Practice quizzes,Pass
+Practice quizzes,Pass
+Practice quizzes,Fail
+Practice quizzes,Fail
+Practice quizzes,Fail
+Practice quizzes,Fail
+Practice quizzes,Fail
+Practice quizzes,Fail
+Practice quizzes,Fail
+Practice quizzes,Fail
+Practice quizzes,Fail
+Practice quizzes,Fail
+Practice quizzes,Fail
+Practice quizzes,Fail
+Practice quizzes,Fail
+Practice quizzes,Fail
+Practice quizzes,Fail
+Read notes,Pass
+Read notes,Pass
+Read notes,Pass
+Read notes,Pass
+Read notes,Pass
+Read notes,Pass
+Read notes,Pass
+Read notes,Pass
+Read notes,Pass
+Read notes,Pass
+Read notes,Pass
+Read notes,Pass
+Read notes,Pass
+Read notes,Pass
+Read notes,Pass
+Read notes,Pass
+Read notes,Pass
+Read notes,Pass
+Read notes,Pass
+Read notes,Pass
+Read notes,Fail
+Read notes,Fail
+Read notes,Fail
+Read notes,Fail
+Read notes,Fail
+Read notes,Fail
+Read notes,Fail
+Read notes,Fail
+Read notes,Fail
+Read notes,Fail
+Read notes,Fail
+Read notes,Fail
+Read notes,Fail
+Read notes,Fail
+Read notes,Fail
+Read notes,Fail
+Read notes,Fail
+Read notes,Fail
+Read notes,Fail
+Read notes,Fail
+Read notes,Fail
+Read notes,Fail
+Read notes,Fail
+Read notes,Fail
+Read notes,Fail
+Read notes,Fail
+Read notes,Fail
+Read notes,Fail
+Read notes,Fail
+Read notes,Fail</textarea>
+      <div class="form-actions"><button type="submit">Analyze data</button><p class="status" id="form-status" role="status"></p></div>
+    </form>
+  </details>
+  <p class="data-summary"><strong id="data-label">Worked example</strong><br><span id="data-summary">N = 100 observations · 2 X categories × 2 F categories</span></p>
+  <p>Rows represent <i>X</i> and columns represent <i>F</i>. Let <i>O</i><sub>ij</sub> be the observed count, <i>R</i><sub>i</sub> the row total, <i>C</i><sub>j</sub> the column total, and <i>N</i> the grand total. The margins show counts and percentages of <i>N</i>. A joint relative frequency is <i>O</i><sub>ij</sub>/<i>N</i>.</p>
+  <div id="observed"><div class="table-scroll" role="region" tabindex="0" aria-label="Observed counts and margins"><table><caption>Observed counts and margins</caption><thead><tr><th scope="col">X ∖ F</th><th scope="col">Pass</th><th scope="col">Fail</th><th scope="col">Row total</th></tr></thead><tbody><tr><th scope="row">Practice quizzes</th><td>35</td><td>15</td><td>50<span class="cell-note">50.00%</span></td></tr><tr><th scope="row">Read notes</th><td>20</td><td>30</td><td>50<span class="cell-note">50.00%</span></td></tr></tbody><tfoot><tr><th scope="row">Column total</th><td>55<span class="cell-note">55.00%</span></td><td>45<span class="cell-note">45.00%</span></td><td>100<span class="cell-note">100.00%</span></td></tr></tfoot></table></div></div>
+  <div class="formula">
+    <div>Marginal: <i>R</i><sub>i</sub>/<i>N</i> for <i>X</i>, &nbsp; <i>C</i><sub>j</sub>/<i>N</i> for <i>F</i>.</div>
+    <div>Conditional: <i>O</i><sub>ij</sub>/<i>R</i><sub>i</sub> for <i>F</i> given <i>X</i>, &nbsp; <i>O</i><sub>ij</sub>/<i>C</i><sub>j</sub> for <i>X</i> given <i>F</i>.</div>
+  </div>
+  <div class="comparison">
+    <div id="f-given-x"><div class="table-scroll" role="region" tabindex="0" aria-label="F given X · row percentages"><table><caption>F given X · row percentages</caption><thead><tr><th scope="col">X ∖ F</th><th scope="col">Pass</th><th scope="col">Fail</th><th scope="col">Row sum</th></tr></thead><tbody><tr><th scope="row">Practice quizzes</th><td>70.00%</td><td>30.00%</td><td>100.00%</td></tr><tr><th scope="row">Read notes</th><td>40.00%</td><td>60.00%</td><td>100.00%</td></tr></tbody></table></div></div>
+    <div id="x-given-f"><div class="table-scroll" role="region" tabindex="0" aria-label="X given F · column percentages"><table><caption>X given F · column percentages</caption><thead><tr><th scope="col">X ∖ F</th><th scope="col">Pass</th><th scope="col">Fail</th></tr></thead><tbody><tr><th scope="row">Practice quizzes</th><td>63.64%</td><td>33.33%</td></tr><tr><th scope="row">Read notes</th><td>36.36%</td><td>66.67%</td></tr></tbody><tfoot><tr><th scope="row">Column sum</th><td>100.00%</td><td>100.00%</td></tr></tfoot></table></div></div>
+  </div>
+  <p class="note">Each row sums to 100% in the first conditional table; each column sums to 100% in the second, before rounding.</p>
+</section>
+<section aria-labelledby="test-title">
+  <h2 id="test-title">3. Expected frequencies and chi-square</h2>
+  <p><strong>Null hypothesis:</strong> <i>X</i> and <i>F</i> are independent. <strong>Alternative:</strong> they are dependent. Under the null, multiply the two estimated marginal probabilities and scale by <i>N</i> to obtain a fitted expected count:</p>
+  <div class="formula"><i>E</i><sub>ij</sub> = <i>N</i> (<i>R</i><sub>i</sub>/<i>N</i>)(<i>C</i><sub>j</sub>/<i>N</i>) = <i>R</i><sub>i</sub><i>C</i><sub>j</sub>/<i>N</i>.</div>
+  <div id="expected"><div class="table-scroll" role="region" tabindex="0" aria-label="Expected counts under independence"><table><caption>Expected counts under independence</caption><thead><tr><th scope="col">X ∖ F</th><th scope="col">Pass</th><th scope="col">Fail</th><th scope="col">Row total</th></tr></thead><tbody><tr><th scope="row">Practice quizzes</th><td>27.5</td><td>22.5</td><td>50</td></tr><tr><th scope="row">Read notes</th><td>27.5</td><td>22.5</td><td>50</td></tr></tbody><tfoot><tr><th scope="row">Column total</th><td>55</td><td>45</td><td>100</td></tr></tfoot></table></div></div>
+  <p>For a table with <i>r</i> rows and <i>c</i> columns, compute Pearson’s statistic without a continuity correction:</p>
+  <div class="formula">χ² = ∑<sub>i,j</sub> (<i>O</i><sub>ij</sub> − <i>E</i><sub>ij</sub>)²/<i>E</i><sub>ij</sub>, &nbsp; df = (<i>r</i> − 1)(<i>c</i> − 1).</div>
+  <p>Assuming independent observations, compare χ² with the <a href="https://www.itl.nist.gov/div898/handbook/eda/section3/eda3674.htm">95th percentile of the chi-square distribution</a> for those degrees of freedom. Reject the null if the statistic exceeds that cutoff. As a conservative rule for the large-sample approximation, the program makes a test decision only if each expected count is at least 5.</p>
+  <div id="test-result" class="test-panel"><div class="test-numbers"><span><b>9.0909</b> <span>Pearson’s χ²</span></span><span><b>1</b> <span>Degrees of freedom</span></span><span><b>3.8415</b> <span>5% critical value</span></span></div><p class="decision"><strong>Reject independence at the 5% level.</strong> The data provide evidence of association, assuming independent observations.</p></div>
+  <h3>Interpretation of the worked example</h3>
+  <p>The expected pass count in the practice-quiz group is 50 × 55 / 100 = 27.5, compared with 35 observed passes. In both rows, the observed pass and fail counts differ from their expected values by 7.5 in magnitude. Thus χ² = 2[(7.5²/27.5) + (7.5²/22.5)] ≈ 9.0909. With one degree of freedom this exceeds 3.8415.</p>
+  <p>The pass rates are <strong>70%</strong> for practice quizzes and <strong>40%</strong> for reading notes, compared with 55% overall. The test rejects independence for these example data under the assumed sampling model. The dataset is synthetic, so this illustrates the interpretation without drawing an inference about real students.</p>
+  <p><strong>Association and causality:</strong> the comparison does not establish that the study method caused the difference in pass rates. In an observational study, prior preparation or study time could influence both method choice and the exam result. A causal claim would require a suitable design, such as random assignment, or justified causal assumptions.</p>
+  <details class="source-code"><summary>View the JavaScript calculation</summary><pre><code>function analyze(pairs, maxCells = Infinity) {
+  const N = pairs.length;
+  if (!N) throw new Error(&#39;Enter at least one paired observation.&#39;);
+  const xLevels = [...new Set(pairs.map(([x]) =&gt; x))];
+  const fLevels = [...new Set(pairs.map(([, f]) =&gt; f))];
+  const r = xLevels.length, c = fLevels.length;
+  if (r * c &gt; maxCells) throw new Error(&#39;The table has more than &#39; + maxCells.toLocaleString(&#39;en-US&#39;) + &#39; cells. Use fewer categories.&#39;);
+  const rowIndex = new Map(xLevels.map((x, i) =&gt; [x, i]));
+  const colIndex = new Map(fLevels.map((f, j) =&gt; [f, j]));
+  const observed = Array.from({ length: r }, () =&gt; Array(c).fill(0));
+  const rowTotals = Array(r).fill(0), colTotals = Array(c).fill(0);
+  for (const [x, f] of pairs) {
+    const i = rowIndex.get(x), j = colIndex.get(f);
+    observed[i][j]++;
+    rowTotals[i]++;
+    colTotals[j]++;
+  }
+
+  const marginalX = rowTotals.map(total =&gt; total / N);
+  const marginalF = colTotals.map(total =&gt; total / N);
+  const fGivenX = observed.map((row, i) =&gt; row.map(count =&gt; count / rowTotals[i]));
+  const xGivenF = observed.map(row =&gt; row.map((count, j) =&gt; count / colTotals[j]));
+  const expected = rowTotals.map(ri =&gt; colTotals.map(cj =&gt; ri * cj / N));
+  let chiSquare = 0, minExpected = Infinity;
+  for (let i = 0; i &lt; r; i++) {
+    for (let j = 0; j &lt; c; j++) {
+      const e = expected[i][j];
+      chiSquare += (observed[i][j] - e) ** 2 / e;
+      minExpected = Math.min(minExpected, e);
+    }
+  }
+  const df = (r - 1) * (c - 1);
+  const critical = df &gt; 0 &amp;&amp; minExpected &gt;= 5 ? criticalValue(df) : null;
+  const decision = df === 0 ? &#39;degenerate&#39; : critical === null ? &#39;sparse&#39; :
+    chiSquare &gt; critical ? &#39;reject&#39; : &#39;fail-to-reject&#39;;
+  return { N, xLevels, fLevels, observed, rowTotals, colTotals, marginalX, marginalF,
+    fGivenX, xGivenF, expected, chiSquare, df, minExpected, critical, decision };
+}</code></pre></details>
+  <p class="note reference">Reference: <a href="https://www.itl.nist.gov/div898/handbook/prc/section4/prc45.htm">NIST/SEMATECH e-Handbook, chi-square test for two-way tables</a>.</p>
+</section>
+</main>
+  <script>'use strict';
+
+const Independence = (() => {
+  const alpha = 0.05;
+
+  function parsePairs(text) {
+    // One X,F pair per line. A quoted field may contain commas or doubled quotes.
+    const pairPattern = /^\s*(?:"((?:[^"]|"")*)"|([^",]*))\s*,\s*(?:"((?:[^"]|"")*)"|([^",]*))\s*$/;
+    const pairs = [];
+    for (const [index, line] of text.split(/\r\n|\n|\r/).entries()) {
+      if (!line.trim()) continue;
+      const match = pairPattern.exec(line);
+      if (!match) throw new Error('Line ' + (index + 1) + ' must contain exactly two comma-separated labels.');
+      const label = (quoted, plain) => quoted === undefined ? plain.trim() : quoted.replaceAll('""', '"');
+      const x = label(match[1], match[2]), f = label(match[3], match[4]);
+      if (!x.trim() || !f.trim()) throw new Error('Line ' + (index + 1) + ' contains a missing label.');
+      pairs.push([x, f]);
+    }
+    return pairs;
+  }
+
+  function analyze(pairs, maxCells = Infinity) {
+    const N = pairs.length;
+    if (!N) throw new Error('Enter at least one paired observation.');
+    const xLevels = [...new Set(pairs.map(([x]) => x))];
+    const fLevels = [...new Set(pairs.map(([, f]) => f))];
+    const r = xLevels.length, c = fLevels.length;
+    if (r * c > maxCells) throw new Error('The table has more than ' + maxCells.toLocaleString('en-US') + ' cells. Use fewer categories.');
+    const rowIndex = new Map(xLevels.map((x, i) => [x, i]));
+    const colIndex = new Map(fLevels.map((f, j) => [f, j]));
+    const observed = Array.from({ length: r }, () => Array(c).fill(0));
+    const rowTotals = Array(r).fill(0), colTotals = Array(c).fill(0);
+    for (const [x, f] of pairs) {
+      const i = rowIndex.get(x), j = colIndex.get(f);
+      observed[i][j]++;
+      rowTotals[i]++;
+      colTotals[j]++;
+    }
+
+    const marginalX = rowTotals.map(total => total / N);
+    const marginalF = colTotals.map(total => total / N);
+    const fGivenX = observed.map((row, i) => row.map(count => count / rowTotals[i]));
+    const xGivenF = observed.map(row => row.map((count, j) => count / colTotals[j]));
+    const expected = rowTotals.map(ri => colTotals.map(cj => ri * cj / N));
+    let chiSquare = 0, minExpected = Infinity;
+    for (let i = 0; i < r; i++) {
+      for (let j = 0; j < c; j++) {
+        const e = expected[i][j];
+        chiSquare += (observed[i][j] - e) ** 2 / e;
+        minExpected = Math.min(minExpected, e);
+      }
+    }
+    const df = (r - 1) * (c - 1);
+    const critical = df > 0 && minExpected >= 5 ? criticalValue(df) : null;
+    const decision = df === 0 ? 'degenerate' : critical === null ? 'sparse' :
+      chiSquare > critical ? 'reject' : 'fail-to-reject';
+    return { N, xLevels, fLevels, observed, rowTotals, colTotals, marginalX, marginalF,
+      fGivenX, xGivenF, expected, chiSquare, df, minExpected, critical, decision };
+  }
+
+  // The cutoff is the 95th percentile of chi-square(df). Evaluate the
+  // gamma tail during bisection; the statistic's p-value is not computed.
+  function criticalValue(df) {
+    const a = df / 2, logGammaA = logGamma(a);
+    let low = 0, high = df + 10 * Math.sqrt(2 * df) + 1;
+    for (let i = 0; i < 60; i++) {
+      const mid = low + (high - low) / 2;
+      if (gammaTail(a, mid / 2, logGammaA) > alpha) low = mid;
+      else high = mid;
+    }
+    return low + (high - low) / 2;
+  }
+
+  function logGamma(a) {
+    let shift = 0;
+    while (a < 16) { shift -= Math.log(a); a++; }
+    const t = 1 / a, t2 = t * t;
+    const correction = t * (1/12 + t2 * (-1/360 + t2 * (1/1260 + t2 * (-1/1680 + t2/1188))));
+    return (a - .5) * Math.log(a) - a + .5 * Math.log(2 * Math.PI) + correction + shift;
+  }
+
+  function gammaTail(a, x, logGammaA) {
+    if (x <= 0) return 1;
+    const scale = Math.exp(a * Math.log(x) - x - logGammaA);
+    if (x < a + 1) {
+      let term = 1 / a, sum = term;
+      for (let i = 1; i <= 10000; i++) {
+        term *= x / (a + i);
+        sum += term;
+        if (term <= sum * 1e-14) return 1 - scale * sum;
+      }
+    } else {
+      // Upper incomplete gamma continued fraction (DLMF 8.9.2, paired terms).
+      const tiny = 1e-300;
+      let b = x + 1 - a, c = 1 / tiny, d = 1 / b, value = d;
+      for (let i = 1; i <= 10000; i++) {
+        const ai = i * (a - i);
+        b += 2;
+        d = b + ai * d;
+        c = b + ai / c;
+        if (Math.abs(d) < tiny) d = tiny;
+        if (Math.abs(c) < tiny) c = tiny;
+        d = 1 / d;
+        const change = c * d;
+        value *= change;
+        if (Math.abs(change - 1) <= 1e-14) return scale * value;
+      }
+    }
+    throw new Error('The chi-square cutoff calculation did not converge.');
+  }
+
+  return { parsePairs, analyze, criticalValue };
+})();
+
+if (typeof module !== 'undefined' && module.exports) module.exports = Independence;
+
+'use strict';
+
+const Display = (() => {
+  const escapes = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+  const safe = x => String(x).replace(/[&<>"']/g, c => escapes[c]);
+  const count = x => x.toLocaleString('en-US');
+  const pct = x => (100 * x).toFixed(2) + '%';
+  const decimal = (x, fixed = 4) => x !== 0 && x < .00005 ? x.toExponential(3) : x.toLocaleString('en-US', {
+    minimumFractionDigits: fixed, maximumFractionDigits: 4
+  });
+  const matrix = (data, title, entries, right = null, bottom = null) => {
+    const label = name => '<th scope="col">' + safe(name) + '</th>';
+    const cell = entry => '<td>' + entry + '</td>';
+    const rows = data.xLevels.map((x, i) =>
+      '<tr><th scope="row">' + safe(x) + '</th>' + entries[i].map(cell).join('') +
+      (right ? cell(right.entries[i]) : '') + '</tr>').join('');
+    const foot = bottom ? '<tfoot><tr><th scope="row">' + bottom.title + '</th>' +
+      bottom.entries.map(cell).join('') + (right ? cell(bottom.total) : '') + '</tr></tfoot>' : '';
+    return '<div class="table-scroll" role="region" tabindex="0" aria-label="' + safe(title) + '"><table><caption>' +
+      title + '</caption><thead><tr><th scope="col">X ∖ F</th>' + data.fLevels.map(label).join('') +
+      (right ? label(right.title) : '') + '</tr></thead><tbody>' + rows + '</tbody>' + foot + '</table></div>';
+  };
+  function observed(data) {
+    const margin = (n, p) => count(n) + '<span class="cell-note">' + pct(p) + '</span>';
+    return matrix(data, 'Observed counts and margins', data.observed.map(row => row.map(count)),
+      { title: 'Row total', entries: data.rowTotals.map((n, i) => margin(n, data.marginalX[i])) },
+      { title: 'Column total', entries: data.colTotals.map((n, j) => margin(n, data.marginalF[j])),
+        total: margin(data.N, 1) });
+  }
+  const conditionalF = data => matrix(data, 'F given X · row percentages', data.fGivenX.map(row => row.map(pct)),
+    { title: 'Row sum', entries: data.rowTotals.map(() => pct(1)) });
+  const conditionalX = data => matrix(data, 'X given F · column percentages', data.xGivenF.map(row => row.map(pct)),
+    null, { title: 'Column sum', entries: data.colTotals.map(() => pct(1)) });
+  const expected = data => matrix(data, 'Expected counts under independence', data.expected.map(row => row.map(x => decimal(x, 0))),
+    { title: 'Row total', entries: data.rowTotals.map(count) },
+    { title: 'Column total', entries: data.colTotals.map(count), total: count(data.N) });
+  const summary = data => 'N = ' + count(data.N) + ' observations · ' + count(data.xLevels.length) +
+    ' X categories × ' + count(data.fLevels.length) + ' F categories';
+
+  function test(data) {
+    let decision;
+    switch (data.decision) {
+      case 'reject':
+        decision = '<strong>Reject independence at the 5% level.</strong> The data provide evidence of association, assuming independent observations.';
+        break;
+      case 'fail-to-reject':
+        decision = '<strong>Do not reject independence at the 5% level.</strong> The evidence of dependence is insufficient; independence has not been established.';
+        break;
+      case 'sparse':
+        decision = '<strong>No test decision.</strong> At least one expected count is below 5 (minimum: ' +
+          decimal(data.minExpected) + '), so the chi-square approximation is not used here.';
+        break;
+      default:
+        decision = '<strong>No test decision.</strong> The test requires at least two observed categories for each variable.';
+    }
+    const cutoff = data.critical === null ? '' : '<span><b>' + decimal(data.critical) + '</b> <span>5% critical value</span></span>';
+    return '<div class="test-numbers"><span><b>' + decimal(data.chiSquare) + '</b> <span>Pearson’s χ²</span></span>' +
+      '<span><b>' + count(data.df) + '</b> <span>Degrees of freedom</span></span>' + cutoff + '</div>' +
+      '<p class="decision">' + decision + '</p>';
+  }
+  return { safe, observed, conditionalF, conditionalX, expected, summary, test };
+})();
+
+if (typeof module !== 'undefined' && module.exports) module.exports = Display;
+
+const byId = id => document.getElementById(id);
+const sampleText = byId('pairs').value;
+
+byId('data-form').addEventListener('submit', event => {
+  event.preventDefault();
+  const status = byId('form-status');
+  const text = byId('pairs').value;
+  try {
+    const result = Independence.analyze(Independence.parsePairs(text), 10000);
+    byId('observed').innerHTML = Display.observed(result);
+    byId('f-given-x').innerHTML = Display.conditionalF(result);
+    byId('x-given-f').innerHTML = Display.conditionalX(result);
+    byId('expected').innerHTML = Display.expected(result);
+    byId('test-result').innerHTML = Display.test(result);
+    byId('data-summary').textContent = Display.summary(result);
+    byId('data-label').textContent = text.trim() === sampleText.trim() ? 'Worked example' : 'Entered dataset';
+    status.textContent = 'Tables and test result updated.';
+    status.classList.remove('error');
+  } catch (error) {
+    status.textContent = error.message + ' The previous results are still displayed.';
+    status.classList.add('error');
+  }
+});
+</script>
+</body>
+</html>
