@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Modes of convergence, the laws of large numbers, the central limit theorem, and Bayesian inference with worked examples.">
+  <title>Homework 7 — Convergence and Bayesian Inference — Mattia Livieri</title>
+  <style>
+    :root {
+      --ink: #192e36; --muted: #50656c; --accent: #11675e;
+      --paper: #fff; --background: #f5f8f6; --rule: #d5e3dc; --soft: #edf5f0;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--background); color: var(--ink); font: 16px/1.65 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    header, main, footer { max-width: 1040px; margin: auto; padding-right: 28px; padding-left: 28px; }
+    header { padding-top: 40px; padding-bottom: 22px; border-bottom: 2px solid var(--accent); }
+    h1, h2, h3 { line-height: 1.25; }
+    h1 { font-size: clamp(1.9rem, 4.2vw, 2.65rem); letter-spacing: -.025em; margin: 0 0 9px; }
+    header p { margin: 0; color: var(--muted); }
+    header .eyebrow { margin-bottom: 9px; color: var(--accent); font-size: .83rem; font-weight: 725; letter-spacing: .04em; }
+    h2 { font-size: 1.57rem; letter-spacing: -.018em; margin: 0 0 15px; }
+    h3 { font-size: 1.12rem; margin: 25px 0 9px; }
+    section { background: var(--paper); border: 1px solid var(--rule); border-radius: 9px; margin: 24px 0; padding: 23px 26px; }
+    p { margin: 10px 0 15px; }
+    li { margin: 8px 0; }
+    ul { padding-left: 23px; }
+    a { color: var(--accent); text-underline-offset: 3px; overflow-wrap: anywhere; }
+    sub, sup { font-size: .74em; line-height: 0; }
+    .equations { margin: 13px 0 16px; padding: 11px 14px; background: var(--soft); border: 1px solid var(--rule); border-left: 3px solid var(--accent); border-radius: 5px; line-height: 1.85; overflow-wrap: anywhere; }
+    .equations > div + div { margin-top: 5px; }
+    .math { font-family: "Cambria Math", "STIX Two Math", Georgia, serif; font-size: 1.06em; }
+    .explanation { font-size: .9rem; color: var(--muted); }
+    .table-scroll { overflow-x: auto; max-width: 100%; margin: 14px 0 17px; }
+    table { width: 100%; border-collapse: collapse; font-size: .875rem; line-height: 1.48; font-variant-numeric: tabular-nums; }
+    caption { text-align: left; font-weight: 680; margin: 0 0 8px; }
+    th, td { padding: 10px 11px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--rule); }
+    thead th { background: #e9f3ed; font-weight: 680; }
+    tbody th { font-weight: 650; }
+    tbody tr:nth-child(even) { background: #f7faf8; }
+    .mode-table th:first-child { width: 23%; }
+    .mode-table td:nth-child(2) { width: 40%; }
+    .definition { display: block; margin-bottom: 4px; }
+    .target { color: var(--accent); font-weight: 700; }
+    .number-table { min-width: 320px; }
+    .posterior-table td strong { display: block; margin-top: 4px; color: var(--accent); }
+    footer { padding-bottom: 26px; color: var(--muted); font-size: .8rem; }
+    footer p { margin: 6px 0; }
+    footer ol { padding-left: 22px; margin: 8px 0 0; }
+    footer li { margin: 5px 0; }
+    @media (max-width: 700px) {
+      header, main, footer { padding-left: 14px; padding-right: 14px; }
+      header { padding-top: 28px; }
+      section { margin: 18px 0; padding: 17px 14px; }
+      h2 { font-size: 1.4rem; }
+      .equations { padding: 9px 11px; }
+      .mode-table, .mode-table tbody { display: block; }
+      .mode-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+      .mode-table tbody tr { display: block; border: 1px solid var(--rule); border-radius: 5px; margin: 10px 0; background: #f8fbf9; }
+      .mode-table tbody th, .mode-table tbody td { display: block; width: auto !important; border: 0; padding: 8px 10px; }
+      .mode-table tbody th { background: #e9f3ed; border-radius: 4px 4px 0 0; }
+      .mode-table tbody td + td { padding-top: 0; }
+      th, td { padding: 8px 7px; }
+      .posterior-table { min-width: 300px; }
+    }
+    @media print {
+      @page { size: A4; margin: 15mm; }
+      body { background: #fff; font-size: 10pt; }
+      header, main, footer, section { margin: 0; padding: 0; max-width: none; }
+      header { padding-bottom: 12px; }
+      section { margin: 15px 0 20px; border: 0; }
+      h1 { font-size: 21pt; }
+      h2 { font-size: 15pt; }
+      h3 { font-size: 11pt; }
+      h2, h3, caption { break-after: avoid; }
+      .equations, tr { break-inside: avoid; }
+      .table-scroll { overflow: visible; }
+      th, td { padding: 5px 6px; }
+      table { min-width: 0 !important; font-size: 8.5pt; }
+      footer { font-size: 8pt; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <p class="eyebrow">Homework 7 · Mattia Livieri</p>
+    <h1>Convergence and Bayesian Inference</h1>
+    <p>Modes of convergence, limit theorems, conditional probability and Bayes’ theorem.</p>
+  </header>
+  <main>
+    <section aria-labelledby="convergence-title">
+      <h2 id="convergence-title">1. Modes of convergence in probability theory</h2>
+      <p>Let <i>Y</i><sub>n</sub> be a sequence of real random variables and <i>Y</i> a proposed limit. Convergence can refer to individual realizations, the size of random errors, or the distributions of the variables. The first three modes below compare variables on the same probability space.</p>
+
+      <div class="table-scroll">
+        <table class="mode-table">
+          <thead><tr><th scope="col">Mode</th><th scope="col">Mathematical definition</th><th scope="col">Meaning and role</th></tr></thead>
+          <tbody>
+            <tr>
+              <th scope="row">In probability</th>
+              <td><span class="definition math">lim<sub>n→∞</sub> P(|Y<sub>n</sub> − Y| &gt; ε) = 0</span> for every ε &gt; 0.</td>
+              <td>The probability of an error exceeding any fixed tolerance tends to zero. This is the conclusion of the weak LLN and the usual meaning of consistency.</td>
+            </tr>
+            <tr>
+              <th scope="row">Almost sure (a.s.)</th>
+              <td><span class="definition math">P(lim<sub>n→∞</sub> Y<sub>n</sub> = Y) = 1.</span></td>
+              <td>For almost every outcome, the sequence converges along that outcome's entire trajectory. This is the strong LLN.</td>
+            </tr>
+            <tr>
+              <th scope="row">Mean-square (L²)</th>
+              <td><span class="definition math">lim<sub>n→∞</sub> E[|Y<sub>n</sub> − Y|²] = 0,</span> for square-integrable variables.</td>
+              <td>The expected squared error vanishes. It is useful for evaluating estimators through mean squared error.</td>
+            </tr>
+            <tr>
+              <th scope="row">In distribution</th>
+              <td><span class="definition math">lim<sub>n→∞</sub> F<sub>Yₙ</sub>(t) = F<sub>Y</sub>(t)</span> at every continuity point of the limiting cumulative distribution function (CDF).</td>
+              <td>The probability laws converge; the variables need not share a probability space. The CLT gives this kind of limit.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Relationships between the modes</h3>
+      <div class="equations">
+        <div>Almost sure ⇒ In probability ⇒ In distribution</div>
+        <div>Mean-square (L²) ⇒ In probability ⇒ In distribution</div>
+      </div>
+      <p>Almost sure convergence controls the eventual behavior of almost every trajectory. Mean-square convergence implies convergence in probability by the inequality P(|<i>Y</i><sub>n</sub>−<i>Y</i>| &gt; ε) ≤ E[|<i>Y</i><sub>n</sub>−<i>Y</i>|²]/ε². The reverse implications generally fail, except that convergence in distribution to a constant implies convergence in probability to that constant. Almost sure convergence and L² convergence do not imply each other in general.</p>
+      <ul>
+        <li><strong>L² without a.s. convergence:</strong> take independent Bernoulli variables <i>Y</i><sub>n</sub> with P(<i>Y</i><sub>n</sub> = 1) = 1/<i>n</i>. Their squared error relative to zero has expectation 1/<i>n</i> → 0. However, since the sum of these probabilities diverges, the second Borel–Cantelli lemma gives infinitely many ones almost surely. They do not converge almost surely to zero.</li>
+        <li><strong>A.s. without L² convergence:</strong> let <i>U</i> be uniform on (0, 1), and <i>Y</i><sub>n</sub> = <i>n</i>·1<sub>{U≤1/n²}</sub>, where 1 denotes an indicator. For almost every <i>U</i>, the variable is eventually zero, but E[<i>Y</i><sub>n</sub>²] = 1 for all <i>n</i>.</li>
+        <li><strong>Distribution without probability convergence:</strong> if <i>Y</i> is equally likely to be −1 or 1 and <i>Y</i><sub>n</sub> = −<i>Y</i>, their distributions are identical. Nevertheless, |<i>Y</i><sub>n</sub>−<i>Y</i>| = 2, so there is no convergence in probability to <i>Y</i>.</li>
+      </ul>
+
+      <h3>Why √n appears: additivity of variance and independence</h3>
+      <p>Let <i>X</i><sub>1</sub>, …, <i>X</i><sub>n</sub> be independent and identically distributed (i.i.d.) observations with mean μ and variance σ², where 0 &lt; σ² &lt; ∞. Define their sum <i>S</i><sub>n</sub> and sample mean X̄<sub>n</sub>:</p>
+      <div class="equations math"><i>S</i><sub>n</sub> = ∑<sub>i=1</sub><sup>n</sup> <i>X</i><sub>i</sub>, &nbsp; X̄<sub>n</sub> = <i>S</i><sub>n</sub>/<i>n</i>.</div>
+      <p>For any finite-variance observations,</p>
+      <div class="equations math">Var(<i>S</i><sub>n</sub>) = ∑<sub>i=1</sub><sup>n</sup> Var(<i>X</i><sub>i</sub>) + 2∑<sub>i&lt;j</sub> Cov(<i>X</i><sub>i</sub>, <i>X</i><sub>j</sub>).</div>
+      <p>Independence makes the covariance terms zero. Pairwise uncorrelatedness is sufficient for this variance calculation. With common variance σ², the sum has variance <i>n</i>σ² and standard deviation σ√<i>n</i>. The mean has variance σ²/<i>n</i> and standard deviation σ/√<i>n</i>.</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th scope="col">Quantity</th><th scope="col">Expectation</th><th scope="col">Variance</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><i>S</i><sub>n</sub></th><td><i>n</i>μ</td><td><i>n</i>σ²</td></tr>
+            <tr><th scope="row">X̄<sub>n</sub> = <i>S</i><sub>n</sub>/<i>n</i></th><td>μ</td><td>σ²/<i>n</i></td></tr>
+            <tr><th scope="row">(<i>S</i><sub>n</sub>−<i>n</i>μ)/(σ√<i>n</i>)</th><td>0</td><td>1</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Centering removes the expected growth of the sum, while dividing by √<i>n</i> compensates for the growth of its standard deviation. Dependence can change this scale: if every <i>X</i><sub>i</sub> equals the same random variable <i>W</i>, then Var(<i>S</i><sub>n</sub>) = <i>n</i>²Var(<i>W</i>). Averaging those identical observations does not reduce uncertainty. Zero covariance alone therefore explains the variance formula, but does not establish the usual independent-sample CLT.</p>
+
+      <h3>Law of Large Numbers (LLN)</h3>
+      <p>For i.i.d. observations with E[|<i>X</i><sub>1</sub>|] &lt; ∞, the <strong>weak law</strong> states that X̄<sub>n</sub> converges in probability to μ; the <strong>strong law</strong> states that X̄<sub>n</sub> converges almost surely to μ.</p>
+      <p>When the variance is also finite, the sample mean is unbiased, and</p>
+      <div class="equations math">
+        <div>E[(X̄<sub>n</sub> − μ)²] = Var(X̄<sub>n</sub>) = σ²/<i>n</i> → 0.</div>
+        <div>P(|X̄<sub>n</sub> − μ| &gt; ε) ≤ σ²/(<i>n</i>ε²) → 0.</div>
+      </div>
+      <p>The first expression proves convergence in L². The second, obtained by Chebyshev’s inequality, proves the finite-variance weak LLN. The i.i.d. weak and strong laws also hold with a finite first absolute moment even when the variance is infinite; the L² argument requires a finite second moment.</p>
+
+      <h3>Central Limit Theorem (CLT) and statistical inference</h3>
+      <p>For i.i.d. observations with finite, positive variance, the classical CLT states</p>
+      <div class="equations math">
+        <div><i>Z</i><sub>n</sub> = (<i>S</i><sub>n</sub> − <i>n</i>μ)/(σ√<i>n</i>) = √<i>n</i>(X̄<sub>n</sub> − μ)/σ.</div>
+        <div><i>Z</i><sub>n</sub> → <i>Z</i> in distribution, where <i>Z</i> ∼ N(0, 1).</div>
+      </div>
+      <p>The LLN gives consistency of the sample mean, whereas the CLT describes the limiting distribution of its rescaled fluctuations. The CLT concerns probability laws and by itself does not imply that individual standardized trajectories converge.</p>
+      <p>In statistical inference, the <strong>standard error</strong> of the sample mean is σ/√<i>n</i>. For example, if σ = 10, increasing <i>n</i> from 25 to 100 reduces the standard error from 2 to 1. For large independent samples, an approximate 95% confidence interval for μ is</p>
+      <div class="equations math">x̄ ± 1.96 <i>s</i>/√<i>n</i>,</div>
+      <p>where <i>s</i> is the sample standard deviation. Under the stated assumptions, the CLT and consistency of <i>s</i> justify an approximate 95% repeated-sampling coverage. Thus √<i>n</i> determines the rate at which uncertainty decreases and explains why halving the standard error generally requires four times as many independent observations.</p>
+    </section>
+
+    <section aria-labelledby="bayes-title">
+      <h2 id="bayes-title">2. Conditional probability, Bayes’ theorem and statistical inference</h2>
+      <h3>Conditional probability and Bayes’ theorem</h3>
+      <p>Conditional probability evaluates an event <i>A</i> when the information <i>B</i> is known. If P(<i>B</i>) &gt; 0,</p>
+      <div class="equations math">P(<i>A</i> | <i>B</i>) = P(<i>A</i> ∩ <i>B</i>)/P(<i>B</i>).</div>
+      <p>For independent events, conditioning on <i>B</i> leaves P(<i>A</i>) unchanged. In statistics, conditional probabilities describe how observations are distributed for a given hypothesis or model parameter. They can also be estimated from observed frequencies: the empirical conditional probability is the number of observations satisfying both <i>A</i> and <i>B</i> divided by the number satisfying <i>B</i>, provided that this count is positive.</p>
+      <p>Let <i>H</i> denote a hypothesis and <i>D</i> the observed data. Expressing P(<i>H</i> ∩ <i>D</i>) in both possible ways gives Bayes’ theorem:</p>
+      <div class="equations math">P(<i>H</i> | <i>D</i>) = P(<i>D</i> | <i>H</i>) P(<i>H</i>)/P(<i>D</i>), &nbsp; P(<i>D</i>) &gt; 0.</div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th scope="col">Component</th><th scope="col">Meaning</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Prior: P(<i>H</i>)</th><td>Information about the hypothesis before using the new data.</td></tr>
+            <tr><th scope="row">Likelihood: P(<i>D</i> | <i>H</i>)</th><td>How compatible the observed data are with each candidate hypothesis.</td></tr>
+            <tr><th scope="row">Posterior: P(<i>H</i> | <i>D</i>)</th><td>The updated probability of the hypothesis after incorporating the data.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>The denominator P(<i>D</i>), called the <em>evidence</em>, normalizes the updated probabilities. For mutually exclusive, exhaustive hypotheses <i>H</i><sub>j</sub>, it is</p>
+      <div class="equations math">P(<i>D</i>) = ∑<sub>j</sub> P(<i>D</i> | <i>H</i><sub>j</sub>) P(<i>H</i><sub>j</sub>).</div>
+      <p>For a continuous parameter θ with prior density π(θ) and likelihood <i>L</i>(θ; <i>d</i>) = <i>f</i>(<i>d</i> | θ), the corresponding update, provided the denominator is positive and finite, is</p>
+      <div class="equations math">
+        <div>π(θ | <i>d</i>) = <i>L</i>(θ; <i>d</i>) π(θ) / ∫ <i>L</i>(<i>t</i>; <i>d</i>) π(<i>t</i>) d<i>t</i>.</div>
+        <div>Posterior ∝ Likelihood × Prior.</div>
+      </div>
+      <p>The likelihood holds the observed data fixed and varies the parameter. It is not generally a normalized probability distribution over that parameter. Bayesian inference uses the posterior for estimating unknown quantities, expressing uncertainty and predicting new observations. A posterior can become the prior for a later update with new data: when datasets are conditionally independent given θ, their likelihoods multiply.</p>
+
+      <h3>Example 1 — Updating the probability of a defective component</h3>
+      <p>Consider a hypothetical quality-control system. Let <i>H</i> mean that a component is defective and <i>D</i> mean that an inspection flags it. Suppose past information gives a defect probability of 1%. A defective item is flagged with probability 0.95, and a non-defective item with probability 0.05.</p>
+      <div class="equations math">
+        <div>P(<i>D</i>) = 0.95 × 0.01 + 0.05 × 0.99 = 0.059.</div>
+        <div>P(<i>H</i> | <i>D</i>) = (0.95 × 0.01)/0.059 = <span class="target">0.1610 ≈ 16.10%</span>.</div>
+      </div>
+      <p>For 10,000 hypothetical components, the expected counts are 95 flagged defective items and 495 flagged non-defective items. Based on these counts, 95 out of 590 alerts correspond to defects. The posterior is very different from the inspection's 95% detection rate because the prior probability of a defect is low.</p>
+      <div class="table-scroll" role="region" aria-label="Sensitivity of the posterior defect probability" tabindex="0">
+        <table class="number-table">
+          <caption>Effect of the prior and likelihood (detection rate fixed at 95%)</caption>
+          <thead><tr><th scope="col">Prior P(<i>H</i>)</th><th scope="col">False-positive rate P(<i>D</i> | ¬<i>H</i>)</th><th scope="col">Posterior P(<i>H</i> | <i>D</i>)</th></tr></thead>
+          <tbody>
+            <tr><td>1%</td><td>5%</td><td class="target">16.10%</td></tr>
+            <tr><td>10%</td><td>5%</td><td class="target">67.86%</td></tr>
+            <tr><td>1%</td><td>1%</td><td class="target">48.97%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>The same positive result means something different in a population with a different base rate. A test with fewer false positives provides stronger evidence. This updating is useful for deciding which components deserve further inspection, but its conclusions depend on reliable estimates of both defect prevalence and inspection performance.</p>
+
+      <h3>Example 2 — Estimating an unknown coin bias</h3>
+      <p>Let θ be the unknown probability of heads. Conditional on θ, suppose the tosses are independent Bernoulli trials. Observing <i>k</i> heads in <i>n</i> tosses gives the binomial likelihood</p>
+      <div class="equations math"><i>L</i>(θ; <i>k</i>) = C(<i>n</i>,<i>k</i>) θ<sup>k</sup>(1−θ)<sup>n−k</sup>, &nbsp; 0 ≤ θ ≤ 1,</div>
+      <p>where C(<i>n</i>,<i>k</i>) is the binomial coefficient. Use a Beta(<i>a</i>, <i>b</i>) prior, with positive parameters <i>a</i> and <i>b</i> and density proportional to θ<sup>a−1</sup>(1−θ)<sup>b−1</sup>. Multiplying it by the likelihood adds the observed head and tail counts to its two parameters:</p>
+      <div class="equations math">
+        <div>Prior: θ ∼ Beta(<i>a</i>, <i>b</i>).</div>
+        <div>Posterior: θ | <i>k</i> ∼ Beta(<i>a</i>+<i>k</i>, <i>b</i>+<i>n</i>−<i>k</i>).</div>
+        <div>Posterior mean = (<i>a</i>+<i>k</i>)/(<i>a</i>+<i>b</i>+<i>n</i>).</div>
+      </div>
+      <p>Compare a uniform prior, Beta(1,1), with Beta(10,10), which places more probability near a fair coin. Both priors have mean 0.5. The table gives the posterior distribution and its mean under two sample sizes with an observed head proportion of 0.8.</p>
+      <div class="table-scroll" role="region" aria-label="Beta-binomial posterior comparison" tabindex="0">
+        <table class="posterior-table">
+          <caption>Effect of prior concentration and sample size</caption>
+          <thead><tr><th scope="col">Prior</th><th scope="col">8 heads in 10 tosses</th><th scope="col">80 heads in 100 tosses</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Beta(1,1)</th><td>Beta(9,3)<strong>Mean: 0.7500</strong></td><td>Beta(81,21)<strong>Mean: 0.7941</strong></td></tr>
+            <tr><th scope="row">Beta(10,10)</th><td>Beta(18,12)<strong>Mean: 0.6000</strong></td><td>Beta(90,30)<strong>Mean: 0.7500</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>With ten tosses, prior concentration has a substantial effect. For the same success proportion and 100 tosses, the results are closer to 0.8 and to each other. Algebraically, the posterior mean is a weighted average of the prior mean <i>a</i>/(<i>a</i>+<i>b</i>) and the observed proportion <i>k</i>/<i>n</i>, with weights proportional to <i>a</i>+<i>b</i> and <i>n</i>. With fixed positive prior parameters and an increasingly large representative sample, the data receive more weight.</p>
+      <p>The posterior mean provides a point estimate of θ and, under the same model, the predictive probability of heads on the next toss. This illustrates how Bayes’ theorem turns a distribution over an unknown parameter into an updated estimate and prediction.</p>
+
+      <h3>Advantages and limitations</h3>
+      <p>Bayesian inference allows existing knowledge to be combined with new observations, provides probability distributions over unknown parameters, and supports sequential learning, credible intervals and prediction. Informative priors can stabilize estimates when data are scarce.</p>
+      <p>However, conclusions may be sensitive to the selected prior, especially for small samples. An unrealistic prior or a misspecified likelihood can produce misleading posteriors. A discrete hypothesis assigned zero prior probability cannot gain posterior probability through ordinary updating, and normalization may be computationally difficult for complex models. Comparing reasonable priors and checking the likelihood assumptions are therefore important when interpreting results.</p>
+    </section>
+  </main>
+  <footer>
+    <p><strong>References</strong></p>
+    <ol>
+      <li>R. G. Gallager, MIT 6.262, <a href="https://ocw.mit.edu/courses/6-262-discrete-stochastic-processes-spring-2011/6d0c6fbaf3afa16cbc76fc1f27d1d34e_MIT6_262S11_chap01.pdf">Introduction and Review of Probability</a>, §1.5.</li>
+      <li>MIT 18.175, <a href="https://ocw.mit.edu/courses/18-175-theory-of-probability-spring-2014/9cf3fd79fc78d5cd60076b2dc942e63e_MIT18_175S14_Lecture7.pdf">Lecture 7: Strong law of large numbers</a>.</li>
+      <li>MIT 18.05, Spring 2022, <a href="https://ocw.mit.edu/courses/18-05-introduction-to-probability-and-statistics-spring-2022/mit18_05_s22_class11-prep.pdf">Bayesian Updating with Discrete Priors</a> and <a href="https://ocw.mit.edu/courses/18-05-introduction-to-probability-and-statistics-spring-2022/mit18_05_s22_class15-prep.pdf">Conjugate Priors: Beta and Normal</a>.</li>
+    </ol>
+  </footer>
+</body>
+</html>
